@@ -1,0 +1,15 @@
+1.0.0
+8/23/2013 Initial port from ApexDoc
+  - upgraded JRE to 1.6
+  - removed Eclipse plugin code
+  - command line 'scope' values are now delimited by "," instead of ";"
+  - many improvements in parsing flexibility
+
+1.0.1
+8/24/2013
+  - allow single-line comments (i.e. /** @author me */)
+  - @description tag is now optional
+  - added processing for interfaces
+  - create links in declaration lines and @see tabs for most Apex types and project custom types
+  - added class/interface declaration subtitle line
+  

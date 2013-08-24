@@ -1,0 +1,2 @@
+projectName = SF ApexDoc
+author = Steve Cox <a href="mailto:scox@salesforce.com?Subject=SF%20Apex%20Documentation">(scox@salesforce.com)</a>
