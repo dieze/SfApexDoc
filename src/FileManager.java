@@ -17,28 +17,37 @@ public class FileManager {
   
   //---------------------------------------------------------------------------
   // Properties
-  private String path;
+  protected String path;
   
   
   //---------------------------------------------------------------------------
   // Methods
+  public FileManager() {
+    this("");
+  }
+  
   public FileManager(String path) {
     SfApexDoc.assertPrecondition(null != path);
     
-    this.path = path.trim().isEmpty() ? "." : path;
+    this.path = path.trim();
+    if (this.path.isEmpty()) this.path = ".";
   }
   
-  public void createDocumentation(ArrayList<ClassModel> models, String projectDetail, String homeContents) {
+  public void createDocs(ArrayList<ClassModel> models, String detailFile, String homeFile) {
     SfApexDoc.assertPrecondition(null != models);
-    SfApexDoc.assertPrecondition(null != projectDetail);
-    SfApexDoc.assertPrecondition(null != homeContents);
+    SfApexDoc.assertPrecondition(null != detailFile);
+    SfApexDoc.assertPrecondition(null != homeFile);
+    
+    String projectDetail = parseProjectDetail(detailFile.trim());
+    if (projectDetail.isEmpty()) projectDetail = HtmlConstants.DEFAULT_PROJECT_DETAIL;
+    
+    String homeContents = parseHtmlFile(homeFile.trim());
+    if (homeContents.isEmpty()) homeContents = HtmlConstants.DEFAULT_HOME_CONTENTS;
     
     String links = "<table width='100%'><tr style='vertical-align:top;'>" + getPageLinks(models);
-    if ((null == homeContents) || homeContents.trim().isEmpty()) {
-      homeContents = HtmlConstants.DEFAULT_HOME_CONTENTS;
-    }
     homeContents = links + "<td width='80%'>" + "<h2 class='section-title'>Home</h2>" + homeContents + "</td>";
-    homeContents = getHeader(projectDetail) + homeContents + HtmlConstants.FOOTER;
+    homeContents = HtmlConstants.HEADER_OPEN + projectDetail + HtmlConstants.HEADER_CLOSE + 
+      homeContents + HtmlConstants.FOOTER;
     
     String fileName = "";
     Hashtable<String, String> classHashTable = new Hashtable<String, String>();
@@ -57,10 +66,10 @@ public class FileManager {
           "</h2>" +
           "<div class='toggle_container_subtitle'>" + model.getNameLine() + "</div>" +
           "<table class='details' rules='all' border='1' cellpadding='6'>" +
-          (model.description.isEmpty() ? "" : "<tr><th>Description</th><td>" + model.description + "</td></tr>") +
-          (model.author.isEmpty() ? "" : "<tr><th>Author</th><td>" + model.author + "</td></tr>") +
-          (model.date.isEmpty() ? "" : "<tr><th>Date</th><td>" + model.date + "</td></tr>") +
-          (model.see.isEmpty() ? "" : "<tr><th>See</th><td>" + model.see + "</td></tr>") +
+          (model.getDescription().isEmpty() ? "" : "<tr><th>Description</th><td>" + model.getDescription() + "</td></tr>") +
+          (model.getAuthor().isEmpty() ? "" : "<tr><th>Author</th><td>" + model.getAuthor() + "</td></tr>") +
+          (model.getDate().isEmpty() ? "" : "<tr><th>Date</th><td>" + model.getDate() + "</td></tr>") +
+          (model.getSee().isEmpty() ? "" : "<tr><th>See</th><td>" + model.getSee() + "</td></tr>") +
           "</table>";
         
         if (!model.properties.isEmpty()) {
@@ -74,9 +83,9 @@ public class FileManager {
             prop.addLinks();
             contents += "<tr><td class='clsPropertyName'>" + name + "</td>" +
               "<td><div class='clsPropertyDeclaration'>" + prop.getNameLine() + "</div>" +
-              "<div class='clsPropertyDescription'>" + prop.description +  
-                (prop.author.isEmpty() && prop.date.isEmpty()? "" : " (" + prop.author + " " + prop.date + ")") +
-                (prop.see.isEmpty() ? "" : " see " + prop.see) +
+              "<div class='clsPropertyDescription'>" + prop.getDescription() +  
+                (prop.getAuthor().isEmpty() && prop.getDate().isEmpty()? "" : " (" + prop.getAuthor() + " " + prop.getDate() + ")") +
+                (prop.getSee().isEmpty() ? "" : " see " + prop.getSee()) +
               "</div></tr>";
           }
           
@@ -92,13 +101,13 @@ public class FileManager {
               "<div class='toggle_container'>" +
               "<div class='toggle_container_subtitle'>" + method.getNameLine() + "</div>" +
               "<table class='details' rules='all' border='1' cellpadding='6'>" + 
-              (method.description != "" ? "<tr><th>Description</th><td>" + method.description + "</td></tr> " : "") +
-              (method.author != "" ? "<tr><th>Author</th><td>" + method.author + "</td></tr> " : "") +
-              (method.date != "" ? "<tr><th>Date</th><td>" + method.date + "</td></tr> " : "") +
-              (method.returns != "" ? "<tr><th>Returns</th><td>" + method.returns + "</td></tr> " : "") +
-              (method.params.size() > 0 ? "<tr><th colspan='2' class='paramHeader'>Parameters</th></tr> " : "");
+              (method.getDescription() != "" ? "<tr><th>Description</th><td>" + method.getDescription() + "</td></tr> " : "") +
+              (method.getAuthor() != "" ? "<tr><th>Author</th><td>" + method.getAuthor() + "</td></tr> " : "") +
+              (method.getDate() != "" ? "<tr><th>Date</th><td>" + method.getDate() + "</td></tr> " : "") +
+              (method.getReturns() != "" ? "<tr><th>Returns</th><td>" + method.getReturns() + "</td></tr> " : "") +
+              (method.getParams().size() > 0 ? "<tr><th colspan='2' class='paramHeader'>Parameters</th></tr> " : "");
     
-            for (String param : method.params) {
+            for (String param : method.getParams()) {
               if ((null != param) && !param.trim().isEmpty()) {
                 if (param.indexOf(' ') != -1) {
                   String list[] = param.split(" ");
@@ -117,99 +126,85 @@ public class FileManager {
               }
             }
             
-            contents += (method.see.isEmpty() ? "" : "<tr><th>See</th><td>" + method.see + "</td></tr>");
+            contents += (method.getSee().isEmpty() ? "" : "<tr><th>See</th><td>" + method.getSee() + "</td></tr>");
             contents += "</table></div>";
           }
         }
         contents += "</div>";
         
-        contents = getHeader(projectDetail) + contents + HtmlConstants.FOOTER;
-        classHashTable.put(fileName, contents);
+        classHashTable.put(fileName, HtmlConstants.HEADER_OPEN + projectDetail + 
+          HtmlConstants.HEADER_CLOSE + contents + HtmlConstants.FOOTER);
       }
     }
     
-    createDocumentationFiles(classHashTable);
+    createDocFiles(classHashTable);
   }
   
-  public String parseProjectDetail(String filePath) {
-    SfApexDoc.assertPrecondition(null != filePath);
-    
-    String contents = "";
-    if (!filePath.trim().isEmpty()) {
-      try {
-        DataInputStream in = new DataInputStream(new FileInputStream(filePath));
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        String line;
-        while ((line = br.readLine()) != null) {
-          line = line.trim();
-          int equalsPos = line.indexOf("=");
-          String key = (equalsPos >= 0) ? line.substring(0, equalsPos).trim() : "";
-          String value = (equalsPos >= 0) ? line.substring(equalsPos + 1).trim() : "";
-          if (key.equalsIgnoreCase("projectname")) {
-            contents += "<h2 style='margin:0px;'>" + value + "</h2>";
-          } else if (!value.isEmpty()) {
-            contents += value + "<br>";
-          }
-        }
-      } catch (Exception e) {
-        SfApexDoc.log(e);
-      }
-    }
-      
-    return contents;
-  }
-
-  // Parse the specified file and return the contents within a string.
-  public String parseHtmlFile(String filePath) {
-    SfApexDoc.assertPrecondition(null != filePath);
-    
+  private String parseProjectDetail(String filePath) {
     String contents = "";
     try {
-      if (!filePath.trim().isEmpty()) {
-        DataInputStream in = new DataInputStream(new FileInputStream(filePath));
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        String line;
-        while ((line = br.readLine()) != null) {
-          contents += line.trim();
+      DataInputStream in = new DataInputStream(new FileInputStream(filePath));
+      BufferedReader br = new BufferedReader(new InputStreamReader(in));
+      String line;
+      while ((line = br.readLine()) != null) {
+        line = line.trim();
+        int equalsPos = line.indexOf("=");
+        String key = (equalsPos >= 0) ? line.substring(0, equalsPos).trim() : "";
+        String value = (equalsPos >= 0) ? line.substring(equalsPos + 1).trim() : "";
+        if (key.equalsIgnoreCase("projectname")) {
+          contents += "<h2 style='margin:0px;'>" + value + "</h2>";
+        } else if (!value.isEmpty()) {
+          contents += value + "<br>";
         }
       }
     } catch (Exception e) {
-      SfApexDoc.log(e);
+      SfApexDoc.log("parseProjectDetail(" + filePath + "): " + e.getMessage());
+    }
+      
+    return contents.trim();
+  }
+
+  private String parseHtmlFile(String filePath) {
+    String contents = "";
+    try {
+      DataInputStream in = new DataInputStream(new FileInputStream(filePath));
+      BufferedReader br = new BufferedReader(new InputStreamReader(in));
+      String line;
+      while ((line = br.readLine()) != null) {
+        contents += line.trim();
+      }
+    } catch (Exception e) {
+      SfApexDoc.log("parseHtmlFile(" + filePath + "): " + e.getMessage());
     }
     
     int bodyStart = contents.indexOf(BODY_START);
-    if (bodyStart != -1) {
+    if (bodyStart >= 0) {
       int bodyEnd = contents.indexOf(BODY_END);
-      if (bodyEnd != -1) {
+      if (bodyEnd >= 0) {
         contents = contents.substring(bodyStart + BODY_START.length(), bodyEnd);
       }
     }
     
-    return contents;
+    return contents.trim();
   }
   
   
   //---------------------------------------------------------------------------
   // Helpers
-  private static String getHeader(String detail) {
-    return HtmlConstants.HEADER_OPEN + (!detail.trim().isEmpty() ? 
-      detail : HtmlConstants.PROJECT_DETAIL) + HtmlConstants.HEADER_CLOSE;
-  }
-  
   private void copyFile(String source, String target) throws Exception {
     InputStream is = getClass().getResourceAsStream(source);
     FileOutputStream to = new FileOutputStream(target + "/" + source);
     byte[] buffer = new byte[4096];
     int bytesRead;
-    while ((bytesRead = is.read(buffer)) != -1) {
-      to.write(buffer, 0, bytesRead); // write
+    while ((bytesRead = is.read(buffer)) >= 0) {
+      to.write(buffer, 0, bytesRead);
     }
     to.flush();
     to.close();
     is.close();
   }
   
-  private void createDocumentationFiles(Hashtable<String, String> classHashTable){
+  private void createDocFiles(Hashtable<String, String> classHashTable){
     try {
       // create required folders for documentation files
       if (!path.endsWith("/") && !path.endsWith("\\")) {
@@ -220,6 +215,7 @@ public class FileManager {
       
       for (String fileName : classHashTable.keySet()) {        
         SfApexDoc.log("Processing: " + fileName);
+        
         File file= new File(path + "/" + fileName + ".html");
         FileOutputStream fos = new FileOutputStream(file);
         DataOutputStream dos = new DataOutputStream(fos);

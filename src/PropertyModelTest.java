@@ -4,28 +4,6 @@ import org.junit.Test;
 
 public class PropertyModelTest {
   @Test
-  public void testPropertyModelInvalidParameters() {
-    ArrayList<String> comments = new ArrayList<String>();
-    try {
-      new PropertyModel(null, null);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
-    
-    try {
-      new PropertyModel("", null);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
-    
-    try {
-      new PropertyModel(null, comments);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
-  }
-  
-  @Test
   public void testGetName() {
     ArrayList<String> comments = new ArrayList<String>();
     

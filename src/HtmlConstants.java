@@ -7,7 +7,7 @@ public class HtmlConstants {
   
   public static final String DEFAULT_HOME_CONTENTS = "<h1>Project Home</h2><p>(specify a -home parameter to override this)</p>";
   
-  public static final String PROJECT_DETAIL = "<h2 style='margin:0px;'>Project Demo</h2>" +
+  public static final String DEFAULT_PROJECT_DETAIL = "<h2 style='margin:0px;'>Project Demo</h2>" +
     "(specify an -author parameter to override this)<br/>" +
     "<a href='http://code.google.com/p/apexdoc/'>(original Google Code project)</a><br/>";
   

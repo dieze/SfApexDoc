@@ -9,10 +9,10 @@ public class MethodModel extends Model {
   //---------------------------------------------------------------------------
   // Methods
   public MethodModel(String nameLine, ArrayList<String> comments) {
-    super(comments, "");
+    super("", comments);
     
     // truncate to just the signature
-    int i = nameLine.lastIndexOf('{');
+    int i = nameLine.indexOf('{');
     setNameLine(((i >= 0) ? nameLine.substring(0, i) : nameLine).trim());
   }
   

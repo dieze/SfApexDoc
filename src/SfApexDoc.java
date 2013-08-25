@@ -21,7 +21,7 @@ public class SfApexDoc {
   
   //---------------------------------------------------------------------------
   // Constants
-  private static final String VERSION = "1.0.1";
+  private static final String VERSION = "1.0.2";
   private static final String LOG_FILE_NAME = "SfApexDocLog.txt";
   private static final String DEFAULT_EXT = "cls";
   
@@ -31,14 +31,6 @@ public class SfApexDoc {
   private static final String COMMENT_START = "/**";
   private static final String COMMENT_END = "*/";
   private static final String DEF_VISIBILITY = "private";
-  
-  // Supported tags
-  public static final String DESC = "@description";
-  public static final String AUTH = "@author";
-  public static final String DATE = "@date";
-  public static final String RET  = "@return";
-  public static final String PARM = "@param";
-  public static final String SEE  = "@see";
   
   
   //---------------------------------------------------------------------------
@@ -55,6 +47,8 @@ public class SfApexDoc {
    * method below.
    */
   public static void main(String[] args) {
+    log("SfApexDoc version " + VERSION + "\n");
+    
     // create a log file
     try {
       logFile = new PrintStream(new FileOutputStream(new File(LOG_FILE_NAME)));
@@ -76,7 +70,7 @@ public class SfApexDoc {
         else if ("-p".equals(argKey)) scope = args[++i].toLowerCase().split(SCOPE_SEP);
         else if ("-x".equals(argKey)) ext = args[++i];
         else if ("-d".equals(argKey)) debugOutput = true;
-        else if ("-v".equals(argKey)) bail("SfApexDoc version " + VERSION);
+        else if ("-v".equals(argKey)) bail(null);
         else syntaxError("Invalid option: " + argKey);
       }
       
@@ -94,9 +88,7 @@ public class SfApexDoc {
         }
       }
       
-      // Create the documentation
-      FileManager m = new FileManager(destDir);
-      m.createDocumentation(models, m.parseProjectDetail(authorFile), m.parseHtmlFile(homeFile));
+      new FileManager(destDir).createDocs(models, authorFile, homeFile);
     } catch (Exception e) {
       log(e);
       syntaxError(null);

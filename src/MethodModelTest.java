@@ -4,28 +4,6 @@ import org.junit.Test;
 
 public class MethodModelTest {
   @Test
-  public void testMethodModelInvalidParameters() {
-    ArrayList<String> comments = new ArrayList<String>();
-    try {
-      new MethodModel(null, null);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
-    
-    try {
-      new MethodModel("", null);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
-    
-    try {
-      new MethodModel(null, comments);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
-  }
-  
-  @Test
   public void testGetName() {
     ArrayList<String> comments = new ArrayList<String>();
     MethodModel m = new MethodModel("", comments);

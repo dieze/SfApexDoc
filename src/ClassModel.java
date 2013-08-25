@@ -21,7 +21,7 @@ public class ClassModel extends Model {
   //---------------------------------------------------------------------------
   // Methods
   public ClassModel(String nameLine, ArrayList<String> comments) {
-    super(comments, nameLine.trim());
+    super(nameLine.trim(), comments);
     
     // add this as a 'type' we can link to
     String name = getName();

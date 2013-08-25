@@ -9,7 +9,7 @@ public class PropertyModel extends Model {
   //---------------------------------------------------------------------------
   // Methods
   public PropertyModel(String nameLine, ArrayList<String> comments) {
-    super(comments, "");
+    super("", comments);
     
     // remove any trailing stuff after property name
     int i = nameLine.indexOf('{');

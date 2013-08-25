@@ -3,50 +3,24 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 public class ClassModelTest {
-  @Test
-  public void testClassModelInvalidParameters() {
-    ArrayList<String> comments = new ArrayList<String>();
-    try {
-      new ClassModel(null, null);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
+  @Test (expected = NullPointerException.class)
+  public void testClassModelBlankLine() {
+    new ClassModel("", new ArrayList<String>());
+  }
     
-    try {
-      new ClassModel("", null);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
+  @Test (expected = NullPointerException.class)
+  public void testClassModelNoClass() {
+    new ClassModel("junk", new ArrayList<String>());
+  }
     
-    try {
-      new ClassModel(null, comments);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
+  @Test (expected = NullPointerException.class)
+  public void testClassModelNoClassName() {
+    new ClassModel("class", new ArrayList<String>());
+  }
     
-    try {
-      new ClassModel("", comments);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
-    
-    try {
-      new ClassModel("junk", comments);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
-    
-    try {
-      new ClassModel("class", comments);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
-    
-    try {
-      new ClassModel("lass X", comments);
-      assertTrue("invalid parameters", false);
-    } catch (NullPointerException e) {
-    }
+  @Test (expected = NullPointerException.class)
+  public void testClassModelPartialClassMatch() {
+    new ClassModel("clas X", new ArrayList<String>());
   }
   
   @Test
@@ -65,7 +39,7 @@ public class ClassModelTest {
     
     m = new ClassModel(" interface d{", comments);
     assertEquals("d", m.getName());
-    assertEquals(true, m.isInterface);
+    assertTrue(m.isInterface);
     
     m = new ClassModel("class e_2", comments);
     assertEquals("e_2", m.getName());
