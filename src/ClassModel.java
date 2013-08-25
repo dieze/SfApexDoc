@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class ClassModel extends Model {
   //---------------------------------------------------------------------------
   // Constants
-  public static final String types = "class|interface";
+  public static final String types = "|class|interface|";
   
   
   //---------------------------------------------------------------------------
@@ -21,26 +21,25 @@ public class ClassModel extends Model {
   //---------------------------------------------------------------------------
   // Methods
   public ClassModel(String nameLine, ArrayList<String> comments) {
-    super(comments, nameLine);
-    assert(null != nameLine);
+    super(comments, nameLine.trim());
     
-    String name = getName().toLowerCase();
-    typeLinks.put(name, name + ".html");
+    // add this as a 'type' we can link to
+    String name = getName();
+    addType(name, name + ".html");
     
-    isInterface = nameLine.matches("(^|.*\\s)interface\\s+.*");
+    isInterface = getNameLine().matches("(^|.*\\s)interface\\s+.*");
   }
   
   public String getName() {
-    for (String t : types.split("\\|")) {
-      t += ' ';
-      int start = nameLine.indexOf(t);
-      if (start >= 0) {
-        start += t.length();
-        int i = nameLine.indexOf(' ', start);
-        return ((i > 0) ? nameLine.substring(start, i) : nameLine.substring(start)).trim();
+    // the name is the word after "class" or "interface"
+    String[] words = getNameLine().split("\\s+");
+    for (int i = 0; i < words.length; ++i) {
+      if (((i + 1) < words.length) && (types.contains('|' + words[i] + '|'))) {
+        return words[i + 1].replaceAll("\\W", "");
       }
     }
     
-    return "";
+    SfApexDoc.assertPrecondition(false); // make sure nameLine contains one of the 'types' before calling this
+    return null;
   }
 }

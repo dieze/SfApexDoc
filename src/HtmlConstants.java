@@ -1,8 +1,3 @@
-/**
- * HTML content for documentation files
- * 
- * @author Steve Cox
- */
 public class HtmlConstants {
   //---------------------------------------------------------------------------
   // Constants

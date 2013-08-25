@@ -9,19 +9,10 @@ import java.util.Map;
  */
 public abstract class Model {
   //---------------------------------------------------------------------------
-  // Properties
-  public String nameLine = "";
-  public String description = "";
-  public String author = "";
-  public String date = "";
-  public String returns = "";
-  public String see = "";
-  public ArrayList<String> params = new ArrayList<String>();
-  
+  // Constants
   private static final String PRIMITIVES_LINK = "http://www.salesforce.com/us/developer/docs/apexcode/Content/langCon_apex_primitives.htm";
   private static final String SOBJECT_LINK = "http://www.salesforce.com/us/developer/docs/apexcode/Content/apex_dynamic_describe_objects_understanding.htm";
-  
-  public static Map<String,String> typeLinks = new HashMap<String,String>();
+  private static final Map<String,String> typeLinks = new HashMap<String,String>();
   static {
     typeLinks.put("blob", PRIMITIVES_LINK);
     typeLinks.put("boolean", PRIMITIVES_LINK);
@@ -36,11 +27,30 @@ public abstract class Model {
     typeLinks.put("time", PRIMITIVES_LINK);
     typeLinks.put("sobject", PRIMITIVES_LINK);
     typeLinks.put("enum", PRIMITIVES_LINK);
-    typeLinks.put("type", "http://www.salesforce.com/us/developer/docs/apexcode/Content/apex_methods_system_type.htm");
     typeLinks.put("sobjecttype", SOBJECT_LINK);
     typeLinks.put("sobjectfield", SOBJECT_LINK);
   };
   
+  
+  //---------------------------------------------------------------------------
+  // Properties
+  private String nameLine = "";
+  public String description = "";
+  public String author = "";
+  public String date = "";
+  public String returns = "";
+  public String see = "";
+  public ArrayList<String> params = new ArrayList<String>();
+  
+  public String getNameLine() { return nameLine; }
+  public void setNameLine(String nameLine) {
+    SfApexDoc.assertPrecondition(null != nameLine);
+    SfApexDoc.assertPrecondition(nameLine.isEmpty() || 
+      (!Character.isWhitespace(nameLine.charAt(0)) && 
+      !Character.isWhitespace(nameLine.charAt(nameLine.length()-1))));
+    
+    this.nameLine = nameLine;
+  }
   
   //---------------------------------------------------------------------------
   // Methods
@@ -49,9 +59,9 @@ public abstract class Model {
    * @author Steve Cox
    */
   protected Model(ArrayList<String> comments, String nameLine) {
-    assert(null != comments);
+    SfApexDoc.assertPrecondition(null != comments);
     
-    this.nameLine = nameLine;
+    setNameLine(nameLine);
 
     String curBlock=null, block=null;
     for (String comment : comments) {
@@ -104,10 +114,14 @@ public abstract class Model {
   
   /** HTML encode and add type links to the model */
   public void addLinks() {
-    nameLine = addLinks(nameLine);
+    setNameLine(addLinks(nameLine));
     see = addLinks(see);
   }
   
+  protected void addType(String name, String link) {
+    typeLinks.put(name.toLowerCase(), link.toLowerCase());
+  }
+
   
   //---------------------------------------------------------------------------
   // Helpers

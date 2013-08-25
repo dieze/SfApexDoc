@@ -9,18 +9,16 @@ import java.util.ArrayList;
 
 /**
  * Similar to ApexDoc, but the Eclipse plugin capabilities have been removed.
- * <p>
- * TODO create GIT repository for sharing, releases, etc.<br/>
- * TODO create unit tests<br/>
- * TODO method signature spanning multiple lines<br/>
- * TODO nested classes<br/>
- * TODO comments are expected to be on the line immediately preceding the class, 
- * method, or property. We need to take annotations and multi-line declarations
- * into account<br/>
  *
  * @author Steve Cox
  */
 public class SfApexDoc {
+  public static void assertPrecondition(boolean condition) {
+    if (!condition) {
+      throw new NullPointerException();
+    }
+  }
+  
   //---------------------------------------------------------------------------
   // Constants
   private static final String VERSION = "1.0.1";
@@ -107,8 +105,6 @@ public class SfApexDoc {
   
   /** log the specified exception to the screen and a file */
   public static void log(Exception e) {
-    assert(null != e);
-    
     e.printStackTrace();
     log(e.getMessage());
   }
@@ -128,9 +124,9 @@ public class SfApexDoc {
   // Helpers
   // Parse the specified file; see inline comments for specific rules
   private static ClassModel parseFileContents(String filePath, String[] scope) {
-    assert(null != filePath);
-    assert(!filePath.isEmpty());
-    assert(null != scope);
+    SfApexDoc.assertPrecondition(null != filePath);
+    SfApexDoc.assertPrecondition(!filePath.isEmpty());
+    SfApexDoc.assertPrecondition(null != scope);
     
     ClassModel model = null;
     String line = "";
@@ -211,8 +207,8 @@ public class SfApexDoc {
   
   // return true if 'line' contains one of the visibility scopes we're looking for
   private static boolean lineContainsScope(String line, String[] scope) {
-    assert(null != line);
-    assert(null != scope);
+    SfApexDoc.assertPrecondition(null != line);
+    SfApexDoc.assertPrecondition(null != scope);
     
     String l = line.toLowerCase();
     for (int i = 0; i < scope.length; i++) {

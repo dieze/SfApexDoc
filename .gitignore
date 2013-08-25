@@ -1,0 +1,8 @@
+.classpath
+.DS_Store
+.externalToolBuilders/
+.project
+ApexDocumentation/
+bin/
+SfApexDoc.jar
+SfApexDocLog.txt

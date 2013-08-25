@@ -23,15 +23,15 @@ public class FileManager {
   //---------------------------------------------------------------------------
   // Methods
   public FileManager(String path) {
-    assert(null != path);
+    SfApexDoc.assertPrecondition(null != path);
     
     this.path = path.trim().isEmpty() ? "." : path;
   }
   
   public void createDocumentation(ArrayList<ClassModel> models, String projectDetail, String homeContents) {
-    assert(null != models);
-    assert(null != projectDetail);
-    assert(null != homeContents);
+    SfApexDoc.assertPrecondition(null != models);
+    SfApexDoc.assertPrecondition(null != projectDetail);
+    SfApexDoc.assertPrecondition(null != homeContents);
     
     String links = "<table width='100%'><tr style='vertical-align:top;'>" + getPageLinks(models);
     if ((null == homeContents) || homeContents.trim().isEmpty()) {
@@ -47,7 +47,7 @@ public class FileManager {
       if (null == model) continue;
       
       String contents = links;
-      if (!model.nameLine.isEmpty()) {
+      if (!model.getNameLine().isEmpty()) {
         fileName = model.getName();
         model.addLinks();
         contents += "<td width='80%'>";
@@ -55,7 +55,7 @@ public class FileManager {
           "<h2 class='section-title'>" + fileName + 
             "<span style='float:right;margin-top:-5px;'><input type='button' value='+/- all' onclick='ToggleAll();' /></span>" +
           "</h2>" +
-          "<div class='toggle_container_subtitle'>" + model.nameLine + "</div>" +
+          "<div class='toggle_container_subtitle'>" + model.getNameLine() + "</div>" +
           "<table class='details' rules='all' border='1' cellpadding='6'>" +
           (model.description.isEmpty() ? "" : "<tr><th>Description</th><td>" + model.description + "</td></tr>") +
           (model.author.isEmpty() ? "" : "<tr><th>Author</th><td>" + model.author + "</td></tr>") +
@@ -73,7 +73,7 @@ public class FileManager {
             String name = prop.getName();
             prop.addLinks();
             contents += "<tr><td class='clsPropertyName'>" + name + "</td>" +
-              "<td><div class='clsPropertyDeclaration'>" + prop.nameLine + "</div>" +
+              "<td><div class='clsPropertyDeclaration'>" + prop.getNameLine() + "</div>" +
               "<div class='clsPropertyDescription'>" + prop.description +  
                 (prop.author.isEmpty() && prop.date.isEmpty()? "" : " (" + prop.author + " " + prop.date + ")") +
                 (prop.see.isEmpty() ? "" : " see " + prop.see) +
@@ -90,7 +90,7 @@ public class FileManager {
             method.addLinks();
             contents += "<h2 class='trigger'><input type='button' value='+' style='width:24px' />&nbsp;&nbsp;<a href='#'>" + name + "</a></h2>" +
               "<div class='toggle_container'>" +
-              "<div class='toggle_container_subtitle'>" + method.nameLine + "</div>" +
+              "<div class='toggle_container_subtitle'>" + method.getNameLine() + "</div>" +
               "<table class='details' rules='all' border='1' cellpadding='6'>" + 
               (method.description != "" ? "<tr><th>Description</th><td>" + method.description + "</td></tr> " : "") +
               (method.author != "" ? "<tr><th>Author</th><td>" + method.author + "</td></tr> " : "") +
@@ -132,7 +132,7 @@ public class FileManager {
   }
   
   public String parseProjectDetail(String filePath) {
-    assert(null != filePath);
+    SfApexDoc.assertPrecondition(null != filePath);
     
     String contents = "";
     if (!filePath.trim().isEmpty()) {
@@ -161,7 +161,7 @@ public class FileManager {
 
   // Parse the specified file and return the contents within a string.
   public String parseHtmlFile(String filePath) {
-    assert(null != filePath);
+    SfApexDoc.assertPrecondition(null != filePath);
     
     String contents = "";
     try {

@@ -9,22 +9,18 @@ public class MethodModel extends Model {
   //---------------------------------------------------------------------------
   // Methods
   public MethodModel(String nameLine, ArrayList<String> comments) {
-    super(comments, null);
-    assert(null != nameLine);
+    super(comments, "");
     
-    int i = nameLine.lastIndexOf(')');
-    this.nameLine = (i >= 0) ? nameLine.substring(0, i + 1) : nameLine;
+    // truncate to just the signature
+    int i = nameLine.lastIndexOf('{');
+    setNameLine(((i >= 0) ? nameLine.substring(0, i) : nameLine).trim());
   }
   
   public String getName() {
-    assert(-1 != nameLine.indexOf('('));
-    
-    int end = nameLine.indexOf('(');
-    int begin = nameLine.lastIndexOf(' ', end);
-    while ((begin > 0) && nameLine.substring(begin, end).trim().isEmpty()) { // space(s) between name & paren
-      begin = nameLine.lastIndexOf(' ', begin - 1);
-    }
-    
-    return ((begin > 0) ? nameLine.substring(begin, end) : nameLine.substring(0, end)).trim();
+    // the word just before the '(' is the method name
+    final String line = getNameLine();
+    int end = line.indexOf('(');
+    String[] words = ((end < 0) ? line : line.substring(0, end)).split("\\s+");
+    return (words.length > 0) ? words[words.length - 1] : words[0];
   }
 }
