@@ -3,13 +3,15 @@ public class HtmlConstants {
   // Constants
   public static final String HEADER_CLOSE = "</td></tr></table></div>";
   
-  public static final String FOOTER = "</div></div></td></tr></table><hr/><center style='font-size:10px;'><a href='http://code.google.com/p/apexdoc/'>Powered By ApexDoc </a></center></body></html>";
+  public static final String FOOTER = "</div></div></td></tr></table><hr/><center style='font-size:10px;'>" +
+    "<a href='https://gitlab.com/StevenWCox/sfapexdoc/wikis/Home'>Powered By SfApexDoc version " +
+    SfApexDoc.VERSION + "</a></center></body></html>";
   
   public static final String DEFAULT_HOME_CONTENTS = "<h1>Project Home</h2><p>(specify a -home parameter to override this)</p>";
   
   public static final String DEFAULT_PROJECT_DETAIL = "<h2 style='margin:0px;'>Project Demo</h2>" +
     "(specify an -author parameter to override this)<br/>" +
-    "<a href='http://code.google.com/p/apexdoc/'>(original Google Code project)</a><br/>";
+    "<a href='https://gitlab.com/StevenWCox/sfapexdoc/wikis/Home'>(GitLab project)</a><br/>";
   
   public static final String HEADER_OPEN = 
     "<html><head><script type='text/javascript' src='jquery-latest.js'></script>" +

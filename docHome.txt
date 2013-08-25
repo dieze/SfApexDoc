@@ -1,4 +1,4 @@
-<h1>SF ApexDoc Project</h1>
+<h1>SfApexDoc Project</h1>
 <p>This is a revamped version of Aslam Bari's ApexDoc. The Eclipse plugin capabilities&nbsp;
 have been removed. Lots of quirks and defects have been fixed as well</p>
 
