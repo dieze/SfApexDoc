@@ -34,7 +34,7 @@ public class ClassModel extends Model {
     // the name is the word after "class" or "interface"
     String[] words = getNameLine().split("\\s+");
     for (int i = 0; i < words.length; ++i) {
-      if (((i + 1) < words.length) && (types.contains('|' + words[i] + '|'))) {
+      if (((i + 1) < words.length) && (types.contains('|' + words[i].toLowerCase() + '|'))) {
         return words[i + 1].replaceAll("\\W", "");
       }
     }

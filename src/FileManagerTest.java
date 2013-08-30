@@ -11,20 +11,11 @@ public class FileManagerTest extends FileManager {
   
   @Test
   public void testValidPath() {
-    FileManager m = new FileManager("");
-    assertEquals("current folder", ".", m.path);
-    
-    m = new FileManager("  \t");
-    assertEquals("current folder", ".", m.path);
-    
-    m = new FileManager(".");
-    assertEquals("current folder", ".", m.path);
-    
-    m = new FileManager("  .. ");
-    assertEquals("current folder", "..", m.path);
-    
-    m = new FileManager("junk");
-    assertEquals("current folder", "junk", m.path);
+    assertEquals("current folder", ".", new FileManager("").path);
+    assertEquals("current folder", ".", new FileManager("  \t").path);
+    assertEquals("current folder", ".", new FileManager(".").path);
+    assertEquals("current folder", "..", new FileManager("  .. ").path);
+    assertEquals("current folder", "junk", new FileManager("junk").path);
   }
   
   @Test (expected = NullPointerException.class)

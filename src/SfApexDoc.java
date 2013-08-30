@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 
 /**
@@ -84,7 +85,7 @@ public class SfApexDoc {
       ArrayList<ClassModel> models = new ArrayList<ClassModel>();
       for (File f : sourceFolder.listFiles()) {
         if (f.isFile() && f.getAbsolutePath().toLowerCase().endsWith("." + ext)) {
-          models.add(parseFileContents(f.getAbsolutePath(), scope));
+          models.add(parse(getFileContents(f.getAbsolutePath()), scope));
         }
       }
       
@@ -114,22 +115,37 @@ public class SfApexDoc {
   
   //---------------------------------------------------------------------------
   // Helpers
-  // Parse the specified file; see inline comments for specific rules
-  private static ClassModel parseFileContents(String filePath, String[] scope) {
-    SfApexDoc.assertPrecondition(null != filePath);
-    SfApexDoc.assertPrecondition(!filePath.isEmpty());
-    SfApexDoc.assertPrecondition(null != scope);
+  // return the specified file as a single string
+  private static String getFileContents(String filePath) {
+    String result = "", line = "";
+    try {
+      InputStreamReader in = new InputStreamReader(new DataInputStream(new FileInputStream(filePath)));
+      BufferedReader reader = new BufferedReader(in);
+      while (null != (line = reader.readLine())) {
+        result += line + '\n';
+      }
+      in.close();
+    } catch (Exception e) {
+      log("Exception loading file: " + filePath);
+    }
     
+    return result;
+  }
+  
+  // Parse the specified text; see inline comments for specific rules
+  // public only for testing
+  public static ClassModel parse(String text, String[] scope) {
     ClassModel model = null;
     String line = "";
+    int lineIndex = 0;
     try {
       boolean commentsStarted = false;
       ArrayList<String> comments = new ArrayList<String>();
        
-      InputStreamReader in = new InputStreamReader(new DataInputStream(new FileInputStream(filePath)));
-      BufferedReader reader = new BufferedReader(in);
+      BufferedReader reader = new BufferedReader(new StringReader(text));
       while (null != (line = reader.readLine())) {
-        line = line.trim().replaceAll("\t", " ");
+        ++lineIndex;
+        line = line.replaceAll("\t", " ").trim();
         if (0 == line.length()) continue;
         
         // ignore anything after // style comments. This allows hiding of tokens from ApexDoc
@@ -187,11 +203,9 @@ public class SfApexDoc {
       }
       
       debug(model);
-      in.close();
     } catch (Exception e) {
       model = null;
-      log("Exception parsing: " + line);
-      log(e);
+      log("Exception parsing line "+ lineIndex + ": " + line);
     }
     
     return model;
