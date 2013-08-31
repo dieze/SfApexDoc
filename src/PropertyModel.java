@@ -9,14 +9,7 @@ public class PropertyModel extends Model {
   //---------------------------------------------------------------------------
   // Methods
   public PropertyModel(String nameLine, ArrayList<String> comments) {
-    super("", comments);
-    
-    // remove any trailing stuff after property name
-    int i = nameLine.indexOf('{');
-    if (i < 0) i = nameLine.indexOf('=');
-    if (i < 0) i = nameLine.indexOf(';');
-    if (i >= 0) nameLine = nameLine.substring(0, i);          
-    setNameLine(nameLine.trim());
+    super(nameLine.trim(), comments);
   }
   
   public String getName() {

@@ -16,19 +16,19 @@ public class PropertyModelTest {
     m = new PropertyModel("\t", comments);
     assertEquals("", m.getName());
     
-    m = new PropertyModel(" private static int whatever junk a = 5 ", comments);
+    m = new PropertyModel(" private static int whatever junk a", comments);
     assertEquals("a", m.getName());
     
-    m = new PropertyModel(" enum b  { 1, 2, 3}", comments);
+    m = new PropertyModel(" enum b", comments);
     assertEquals("b", m.getName());
     
-    m = new PropertyModel("String[] c = null", comments);
+    m = new PropertyModel("String[] c", comments);
     assertEquals("c", m.getName());
     
-    m = new PropertyModel("int d=5;", comments);
+    m = new PropertyModel("int d", comments);
     assertEquals("d", m.getName());
     
-    m = new PropertyModel(" int e; ", comments);
+    m = new PropertyModel(" int e ", comments);
     assertEquals("e", m.getName());
     
     m = new PropertyModel("f", comments);

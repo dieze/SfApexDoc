@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Similar to ApexDoc, but the Eclipse plugin capabilities have been removed.
@@ -22,12 +23,13 @@ public class SfApexDoc {
   
   //---------------------------------------------------------------------------
   // Constants
-  public static final String VERSION = "1.0.1";
+  public static final String VERSION = "1.0.2";
   private static final String LOG_FILE_NAME = "SfApexDocLog.txt";
   private static final String DEFAULT_EXT = "cls";
   
   private static final String[] DEFAULT_SCOPE = new String[] { "global", "public" };
   private static final String SCOPE_SEP = ",";
+  private static final String END_OF_SIGNATURE = "{}=;";
   
   private static final String COMMENT_START = "/**";
   private static final String COMMENT_END = "*/";
@@ -85,7 +87,12 @@ public class SfApexDoc {
       ArrayList<ClassModel> models = new ArrayList<ClassModel>();
       for (File f : sourceFolder.listFiles()) {
         if (f.isFile() && f.getAbsolutePath().toLowerCase().endsWith("." + ext)) {
-          models.add(parse(getFileContents(f.getAbsolutePath()), scope));
+          ClassModel m = parse(getFileContents(f.getAbsolutePath()), scope);
+          if (null != m) {
+            Collections.sort(m.properties, new ModelComparer());
+            Collections.sort(m.methods, new ModelComparer());
+            models.add(m);
+          }
         }
       }
       
@@ -136,7 +143,7 @@ public class SfApexDoc {
   // public only for testing
   public static ClassModel parse(String text, String[] scope) {
     ClassModel model = null;
-    String line = "";
+    String line = "", prevLine = null;
     int lineIndex = 0;
     try {
       boolean commentsStarted = false;
@@ -145,9 +152,7 @@ public class SfApexDoc {
       BufferedReader reader = new BufferedReader(new StringReader(text));
       while (null != (line = reader.readLine())) {
         ++lineIndex;
-        line = line.replaceAll("\t", " ").trim();
-        if (0 == line.length()) continue;
-        
+
         // ignore anything after // style comments. This allows hiding of tokens from ApexDoc
         int i = line.indexOf("//");
         if (i > -1) {
@@ -157,47 +162,66 @@ public class SfApexDoc {
           }
         }
         
-        // gather up our comments
-        if (line.startsWith(COMMENT_START)) {
-          comments.clear();
-          // check for single-line block comment
-          if (line.endsWith(COMMENT_END)) {
-            comments.add(line.substring(COMMENT_START.length(), line.length() - COMMENT_END.length()));
+        line = line.replaceAll("\t", " ").trim();
+        if (line.length() > 0) {
+          // gather up our comments
+          if (line.startsWith(COMMENT_START)) {
+            comments.clear();
+            // check for single-line block comment
+            if (line.endsWith(COMMENT_END)) {
+              comments.add(line.substring(COMMENT_START.length(), line.length() - COMMENT_END.length()));
+            } else {
+              commentsStarted = true;
+            }
+          } else if (commentsStarted && line.endsWith(COMMENT_END)) {
+            commentsStarted = false;
+          } else if (commentsStarted) {
+            comments.add(line);
           } else {
-            commentsStarted = true;
-          }
-        } else if (commentsStarted && line.endsWith(COMMENT_END)) {
-          commentsStarted = false;
-        } else if (commentsStarted) {
-          comments.add(line);
-        } else {
-          // ignore anything after an '=' or '{'; this avoids confusing properties with methods
-          if ((i = line.indexOf('=')) > -1) line = line.substring(0, i);
-          if ((i = line.indexOf('{')) > -1) line = line.substring(0, i);
-          
-          boolean hasScope = lineContainsScope(line, scope);
-          if (line.toLowerCase().matches("(^|.*\\s)(" + ClassModel.types + ")\\s+.*")) {
-            if (null == model) {
-              // top-level class
-              if (!hasScope) break;  // must be a test class - skip it
-              model = new ClassModel(line, comments);
-              comments.clear();
-            } else if (hasScope || lineContainsScope(DEF_VISIBILITY, scope)) {
-              // nested class
-              comments.clear();
+            if (null != prevLine) {
+              line = prevLine + ' ' + line;
+              prevLine = null;
             }
-          } else if ((null != model) && line.contains("(")) {
-            if (hasScope || model.isInterface) {
-              // method
-              model.methods.add(new MethodModel(line, comments));
+            
+            boolean endOfSignature = false;
+            i = line.length();
+            for (int j = 0, iEnd; j < END_OF_SIGNATURE.length(); ++j) {
+              if ((iEnd = line.indexOf(END_OF_SIGNATURE.charAt(j))) >= 0) {
+                endOfSignature = true;
+                i = Math.min(i, iEnd);
+              }
             }
-            comments.clear();
-          } else if (null != model) {
-            if (hasScope) {
-              // property, enum
-              model.properties.add(new PropertyModel(line, comments));
+            
+            if (endOfSignature) {
+              line = line.substring(0, i);
+              boolean hasScope = lineContainsScope(line, scope);
+              if (line.toLowerCase().matches("(^|.*\\s)(" + ClassModel.types + ")\\s+.*")) {
+                if (null == model) {
+                  // top-level class
+                  if (!hasScope) break;  // must be a test class - skip it
+                  model = new ClassModel(line, comments);
+                  comments.clear();
+                } else if (hasScope || lineContainsScope(DEF_VISIBILITY, scope)) {
+                  // nested class
+                  comments.clear();
+                }
+              } else if ((null != model) && line.contains("(")) {
+                if (hasScope || model.isInterface) {
+                  // method
+                  model.methods.add(new MethodModel(line, comments));
+                }
+                comments.clear();
+              } else if (null != model) {
+                if (hasScope) {
+                  // property, enum
+                  model.properties.add(new PropertyModel(line, comments));
+                }
+                comments.clear();
+              }
+            } else {
+              // append the next line and try again
+              prevLine = line;
             }
-            comments.clear();
           }
         }
       }

@@ -121,7 +121,7 @@ public class Model {
   protected void addType(String name, String link) {
     typeLinks.put(name.toLowerCase(), link.toLowerCase());
   }
-
+  
   
   //---------------------------------------------------------------------------
   // Helpers

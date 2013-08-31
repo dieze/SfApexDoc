@@ -53,8 +53,6 @@ public class FileManager {
     Hashtable<String, String> classHashTable = new Hashtable<String, String>();
     classHashTable.put("index", homeContents);
     for (ClassModel model : models) {
-      if (null == model) continue;
-      
       String contents = links;
       if (!model.getNameLine().isEmpty()) {
         fileName = model.getName();
@@ -234,7 +232,7 @@ public class FileManager {
     String links = "<td width='20%' class='leftmenus'><div onclick=\"gotomenu('index.html');\">Home</div>";
     for (ClassModel model : models) {
       String name;
-      if ((null != model) && !(name = model.getName()).isEmpty()) {
+      if (!(name = model.getName()).isEmpty()) {
         links += "<div onclick=\"gotomenu('" + name + ".html');\">" + name + "</div>";
       }
     }
