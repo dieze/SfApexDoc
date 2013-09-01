@@ -1,5 +1,6 @@
-import static org.junit.Assert.*;
+package sf;
 
+import static org.junit.Assert.*;
 import java.util.ArrayList;
 import org.junit.Test;
 

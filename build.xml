@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="CopyCreateJar" name="Create Runnable Jar">
   <target name="CreateJar">
-    <jar destfile="/Users/scox/Dev/Repos/SfApexDoc/SfApexDoc.jar" filesetmanifest="mergewithoutmain">
+    <jar destfile="/Users/scox/Dev/Repos/SfApexDoc/SfApexDoc.jar">
       <manifest>
-        <attribute name="Main-Class" value="SfApexDoc"/>
+        <attribute name="Main-Class" value="sf.SfApexDoc"/>
         <attribute name="Class-Path" value="."/>
         <attribute name="Specification-Title" value="SfApexDoc"/>
         <attribute name="Specification-Version" value="${version}"/>

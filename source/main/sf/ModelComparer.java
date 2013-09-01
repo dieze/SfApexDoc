@@ -1,3 +1,5 @@
+package sf;
+
 import java.util.Comparator;
 
 public class ModelComparer implements Comparator<Model> {

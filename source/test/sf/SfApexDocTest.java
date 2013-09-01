@@ -1,7 +1,7 @@
+package sf;
+
 import static org.junit.Assert.*;
-
 import java.util.Collections;
-
 import org.junit.Test;
 
 public class SfApexDocTest {
