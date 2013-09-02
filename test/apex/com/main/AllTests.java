@@ -1,4 +1,4 @@
-package sf;
+package apex.com.main;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

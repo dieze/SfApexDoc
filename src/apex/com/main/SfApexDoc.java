@@ -1,4 +1,4 @@
-package sf;
+package apex.com.main;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -8,38 +8,57 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 
 /**
  * Similar to ApexDoc, but the Eclipse plugin capabilities have been removed.
  *
  * @author Steve Cox
  */
-public class SfApexDoc {
-  public static void assertPrecondition(boolean condition) {
-    if (!condition) {
-      throw new NullPointerException();
-    }
-  }
-  
+public class SfApexDoc implements IRunnableWithProgress {
   //---------------------------------------------------------------------------
   // Constants
   public static final String VERSION = "1.0.3";
   private static final String LOG_FILE_NAME = "SfApexDocLog.txt";
   private static final String DEFAULT_EXT = "cls";
   
-  private static final String[] DEFAULT_SCOPE = new String[] { "global", "public" };
-  private static final String SCOPE_SEP = ",";
+  public static final Map<String,Boolean> SCOPES = new HashMap<String,Boolean>();
+  static {
+    SCOPES.put("global", true);
+    SCOPES.put("public", true);
+    SCOPES.put("protected", false);
+    SCOPES.put("private", false);
+  };
+  public static final String SCOPE_SEP = ",";
   private static final String END_OF_SIGNATURE = "{}=;";
   
   private static final String COMMENT_START = "/**";
   private static final String COMMENT_END = "*/";
   private static final String DEF_VISIBILITY = "private";
   
+  public static final String SRC_ARG   = "-s";
+  public static final String TARG_ARG  = "-t";
+  public static final String HOME_ARG  = "-h";
+  public static final String AUTH_ARG  = "-a";
+  public static final String SCOPE_ARG = "-p";
+  public static final String EXT_ARG   = "-x";
+  public static final String DEBUG_ARG = "-d";
+  public static final String VERS_ARG  = "-v";
+  
   
   //---------------------------------------------------------------------------
   // Properties
+  public static ArrayList<String> args = new ArrayList<String>();
+  
+  private static IProgressMonitor monitor;
   private static PrintStream logFile;
   private static boolean debugOutput = false;
 
@@ -47,12 +66,32 @@ public class SfApexDoc {
   //---------------------------------------------------------------------------
   // Methods
   /**
+   * public entry point when called from the Eclipse PlugIn.
+   * assumes PlugIn previously sets rgstrArgs before calling run.
+   */
+  public void runPlugin(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+    doIt(args, monitor);
+  }
+  
+  /** IRunnableWithProgress method */
+  public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+    doIt(args, monitor);
+  }
+  
+  /**
    * Entry point for SfApexDoc. Invoke this from a command line 
    * interface, ANT script, etc. Parameters are documented in the 'syntaxError'
    * method below.
    */
   public static void main(String[] args) {
+    doIt(new ArrayList<String>(Arrays.asList(args)), null);
+  }
+  
+  public static void doIt(ArrayList<String> args, IProgressMonitor monitor) {
     log("SfApexDoc version " + VERSION + "\n");
+    
+    SfApexDoc.assertPrecondition(null != args);
+    SfApexDoc.monitor = monitor;
     
     // create a log file
     try {
@@ -64,18 +103,24 @@ public class SfApexDoc {
     // parse command line parameters
     String sourceDir="", destDir="", homeFile="", authorFile="", ext=DEFAULT_EXT;
     try {
-      String[] scope = DEFAULT_SCOPE;
-      for (int i = 0; i < args.length; ++i) {
-        String argKey = args[i].substring(0, 2).toLowerCase();
+      ArrayList<String> scope = new ArrayList<String>();
+      for (String s : SCOPES.keySet()) {
+        if (SCOPES.get(s)) {
+          scope.add(s);
+        }
+      }
+      
+      for (int i = 0; i < args.size(); ++i) {
+        String argKey = args.get(i).substring(0, 2).toLowerCase();
         
-        if ("-s".equals(argKey)) sourceDir = args[++i];
-        else if ("-t".equals(argKey)) destDir = args[++i];
-        else if ("-h".equals(argKey)) homeFile = args[++i];
-        else if ("-a".equals(argKey)) authorFile = args[++i];
-        else if ("-p".equals(argKey)) scope = args[++i].toLowerCase().split(SCOPE_SEP);
-        else if ("-x".equals(argKey)) ext = args[++i];
-        else if ("-d".equals(argKey)) debugOutput = true;
-        else if ("-v".equals(argKey)) bail(null);
+        if (SRC_ARG.equals(argKey)) sourceDir = args.get(++i);
+        else if (TARG_ARG.equals(argKey)) destDir = args.get(++i);
+        else if (HOME_ARG.equals(argKey)) homeFile = args.get(++i);
+        else if (AUTH_ARG.equals(argKey)) authorFile = args.get(++i);
+        else if (SCOPE_ARG.equals(argKey)) scope = new ArrayList<String>(Arrays.asList(args.get(++i).toLowerCase().split(SCOPE_SEP)));
+        else if (EXT_ARG.equals(argKey)) ext = args.get(++i);
+        else if (DEBUG_ARG.equals(argKey)) debugOutput = true;
+        else if (VERS_ARG.equals(argKey)) bail(null);
         else syntaxError("Invalid option: " + argKey);
       }
       
@@ -85,23 +130,39 @@ public class SfApexDoc {
         bail("Invalid source folder: " + sourceDir);
       }
       
+      File[] files = sourceFolder.listFiles();
+      if (monitor != null) {
+        // progress (for each file: parse, write HTML)
+        monitor.beginTask("SfApexDoc - documenting Apex Class files...", files.length * 2);
+      }
+      
       // get the list of files to process
       ArrayList<ClassModel> models = new ArrayList<ClassModel>();
-      for (File f : sourceFolder.listFiles()) {
+      for (File f : files) {
         if (f.isFile() && f.getAbsolutePath().toLowerCase().endsWith("." + ext)) {
           ClassModel m = parse(getFileContents(f.getAbsolutePath()), scope);
           if (null != m) {
             Collections.sort(m.properties, new ModelComparer());
             Collections.sort(m.methods, new ModelComparer());
             models.add(m);
+          } else {
+            showProgress(1); // we won't be creating docs for this
           }
+        } else {
+          showProgress(1); // we won't be creating docs for this
         }
+        
+        showProgress(1);
       }
       
       new FileManager(destDir).createDocs(models, authorFile, homeFile);
     } catch (Exception e) {
       log(e);
       syntaxError(null);
+    } finally {
+      if (null != monitor) {
+        monitor.done();
+      }
     }
   }
   
@@ -118,6 +179,18 @@ public class SfApexDoc {
       if (null != logFile) {
         logFile.println(message);
       }
+    }
+  }
+  
+  public static void assertPrecondition(boolean condition) {
+    if (!condition) {
+      throw new NullPointerException();
+    }
+  }
+  
+  public static void showProgress(int units) {
+    if (null != monitor) {
+      monitor.worked(1);
     }
   }
   
@@ -143,7 +216,7 @@ public class SfApexDoc {
   
   // Parse the specified text; see inline comments for specific rules
   // public only for testing
-  public static ClassModel parse(String text, String[] scope) {
+  public static ClassModel parse(String text, ArrayList<String> scope) {
     ClassModel model = null;
     String line = "", prevLine = null;
     int lineIndex = 0;
@@ -238,13 +311,13 @@ public class SfApexDoc {
   }
   
   // return true if 'line' contains one of the visibility scopes we're looking for
-  private static boolean lineContainsScope(String line, String[] scope) {
+  private static boolean lineContainsScope(String line, ArrayList<String> scope) {
     SfApexDoc.assertPrecondition(null != line);
     SfApexDoc.assertPrecondition(null != scope);
     
     String l = line.toLowerCase();
-    for (int i = 0; i < scope.length; i++) {
-      if (l.matches("(^|.*\\s)" + scope[i] + "\\s+(?!get|set;|set\\s*\\{).*")) {
+    for (int i = 0; i < scope.size(); i++) {
+      if (l.matches("(^|.*\\s)" + scope.get(i) + "\\s+(?!get|set;|set\\s*\\{).*")) {
         return true;
       }
     }

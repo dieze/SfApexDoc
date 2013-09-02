@@ -1,8 +1,10 @@
-package sf;
+package apex.com.main;
 
 import static org.junit.Assert.*;
 import java.util.ArrayList;
 import org.junit.Test;
+
+import apex.com.main.FileManager;
 
 public class FileManagerTest extends FileManager {
   public void testNullPath() {

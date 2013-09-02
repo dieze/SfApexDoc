@@ -1,4 +1,4 @@
-package sf;
+package apex.com.main;
 
 import java.io.*;
 import java.util.*;
@@ -12,7 +12,7 @@ import java.util.*;
 public class FileManager {
   //---------------------------------------------------------------------------
   // Constants
-  private static final String ROOT_DIRECTORY = "ApexDocumentation";
+  public static final String ROOT_DIRECTORY = "SfApexDocs";
   private static final String BODY_START = "<body>";
   private static final String BODY_END = "</body>";
   
@@ -204,7 +204,7 @@ public class FileManager {
     is.close();
   }
   
-  private void createDocFiles(Hashtable<String, String> classHashTable){
+  private void createDocFiles(Hashtable<String, String> classHashTable) {
     try {
       // create required folders for documentation files
       if (!path.endsWith("/") && !path.endsWith("\\")) {
@@ -222,6 +222,8 @@ public class FileManager {
         dos.writeBytes(classHashTable.get(fileName));
         dos.close();
         fos.close();
+        
+        SfApexDoc.showProgress(1);
       }
       
       copyResources(path);

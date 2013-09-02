@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %Bundle-Name.0
+Bundle-SymbolicName: com.apex.doc;singleton:=true
+Bundle-Version: 1.0.3
+Bundle-Activator: com.apex.doc.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.junit
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.eclipse.jdt.core,
+ org.eclipse.ui.forms.widgets
+Export-Package: apex.com.main, com.apex.doc, com.apex.doc.popup.actions
+Bundle-Localization: plugin
+Bundle-Vendor: %Bundle-Vendor.0

@@ -1,4 +1,4 @@
-package sf;
+package apex.com.main;
 
 public class HtmlConstants {
   //---------------------------------------------------------------------------
