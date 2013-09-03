@@ -25,6 +25,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import apex.com.main.FileManager;
 import apex.com.main.SfApexDoc;
+import apex.com.main.SfApexDocPlugin;
 
 /**
  * Dialog to display when plugin dialog is displayed
@@ -179,7 +180,7 @@ public class ApexDocForm extends ApplicationWindow {
         	  SfApexDoc.args.add(scope);
         	}
         	       		        	
-        	new ProgressMonitorDialog(form.getShell()).run(true, false, new SfApexDoc()); 
+        	new ProgressMonitorDialog(form.getShell()).run(true, false, new SfApexDocPlugin()); 
         	
     			if (MessageDialog.openQuestion(form.getShell(), OPEN_PROMPT_TITLE,
     			  String.format(OPEN_PROMPT, new Object[] {target.getText()}))) {

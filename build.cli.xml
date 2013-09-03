@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="copy-jar" name="Create Runnable Jar">
+  <property name="tools.dir" value="/Users/scox/Dev/Tools"/>
+	
+	<target name="clean">
+    <delete file="${tools.dir}/SfApexDoc.jar"/>
+    <delete file="SfApexDoc.jar"/>
+	</target>
+  
+  <target name="create-jar" depends="clean">
+    <jar destfile="SfApexDoc.jar" basedir="bin" excludes="**/*Test*.class, com/**">
+      <manifest>
+        <attribute name="Main-Class" value="apex.com.main.SfApexDoc"/>
+        <attribute name="Class-Path" value="."/>
+        <attribute name="Specification-Title" value="SfApexDoc"/>
+        <attribute name="Specification-Version" value="${version}"/>
+        <attribute name="Specification-Vendor" value="Steve Cox"/>
+        <attribute name="Implementation-Title" value="common"/>
+        <attribute name="Implementation-Version" value="${version} ${TODAY}"/> 
+        <attribute name="Implementation-Vendor" value="Steve Cox"/>      	
+      </manifest>
+    </jar>
+  </target>
+    
+  <target name="copy-jar" depends="create-jar">
+    <copy file="SfApexDoc.jar" tofile="${tools.dir}/SfApexDoc.jar"/>
+  </target>
+</project>

@@ -223,7 +223,7 @@ public class FileManager {
         dos.close();
         fos.close();
         
-        SfApexDoc.showProgress(1);
+        SfApexDoc.instance.showProgress(1);
       }
       
       copyResources(path);

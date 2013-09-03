@@ -8,21 +8,18 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.StringReader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 /**
  * Similar to ApexDoc, but the Eclipse plugin capabilities have been removed.
  *
  * @author Steve Cox
  */
-public class SfApexDoc implements IRunnableWithProgress {
+public class SfApexDoc {
   //---------------------------------------------------------------------------
   // Constants
   public static final String VERSION = "1.1.0";
@@ -56,21 +53,22 @@ public class SfApexDoc implements IRunnableWithProgress {
   //---------------------------------------------------------------------------
   // Properties
   public static ArrayList<String> args = new ArrayList<String>();
+  public static SfApexDoc instance;
   
-  private static IProgressMonitor monitor;
   private static PrintStream logFile;
   private static boolean debugOutput = false;
 
   
   //---------------------------------------------------------------------------
-  // Methods
-  /** Eclipse Plugin entry point */
-  public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    SfApexDoc.monitor = monitor;
-    doIt();
-    monitor.done();
+  // Constructor
+  public SfApexDoc() {
+    SfApexDoc.assertPrecondition(null == instance); // singleton
+    instance = this;
   }
   
+  
+  //---------------------------------------------------------------------------
+  // Methods
   /**
    * Entry point for SfApexDoc. Invoke this from a command line 
    * interface, ANT script, etc. Parameters are documented in the 'syntaxError'
@@ -177,14 +175,8 @@ public class SfApexDoc implements IRunnableWithProgress {
   
   //---------------------------------------------------------------------------
   // Helpers
-  public static void initProgress(int units) {
-    // progress (for each file: parse, write HTML)
-    monitor.beginTask("SfApexDoc - documenting Apex Class files...", units);
-  }
-  
-  public static void showProgress(int units) {
-    monitor.worked(1);
-  }
+  public void initProgress(int units) {}
+  public void showProgress(int units) {}
   
   // return the specified file as a single string
   private static String getFileContents(String filePath) {
