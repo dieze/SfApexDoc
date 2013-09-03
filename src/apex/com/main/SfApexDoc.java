@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
@@ -26,7 +25,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 public class SfApexDoc implements IRunnableWithProgress {
   //---------------------------------------------------------------------------
   // Constants
-  public static final String VERSION = "1.0.3";
+  public static final String VERSION = "1.1.0";
   private static final String LOG_FILE_NAME = "SfApexDocLog.txt";
   private static final String DEFAULT_EXT = "cls";
   
@@ -65,17 +64,11 @@ public class SfApexDoc implements IRunnableWithProgress {
   
   //---------------------------------------------------------------------------
   // Methods
-  /**
-   * public entry point when called from the Eclipse PlugIn.
-   * assumes PlugIn previously sets rgstrArgs before calling run.
-   */
-  public void runPlugin(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    doIt(args, monitor);
-  }
-  
-  /** IRunnableWithProgress method */
+  /** Eclipse Plugin entry point */
   public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    doIt(args, monitor);
+    SfApexDoc.monitor = monitor;
+    doIt();
+    monitor.done();
   }
   
   /**
@@ -84,14 +77,14 @@ public class SfApexDoc implements IRunnableWithProgress {
    * method below.
    */
   public static void main(String[] args) {
-    doIt(new ArrayList<String>(Arrays.asList(args)), null);
+    SfApexDoc.args = new ArrayList<String>(Arrays.asList(args));
+    new SfApexDoc().doIt();
   }
   
-  public static void doIt(ArrayList<String> args, IProgressMonitor monitor) {
+  public void doIt() {
     log("SfApexDoc version " + VERSION + "\n");
     
     SfApexDoc.assertPrecondition(null != args);
-    SfApexDoc.monitor = monitor;
     
     // create a log file
     try {
@@ -131,10 +124,7 @@ public class SfApexDoc implements IRunnableWithProgress {
       }
       
       File[] files = sourceFolder.listFiles();
-      if (monitor != null) {
-        // progress (for each file: parse, write HTML)
-        monitor.beginTask("SfApexDoc - documenting Apex Class files...", files.length * 2);
-      }
+      initProgress(files.length * 2);
       
       // get the list of files to process
       ArrayList<ClassModel> models = new ArrayList<ClassModel>();
@@ -159,10 +149,6 @@ public class SfApexDoc implements IRunnableWithProgress {
     } catch (Exception e) {
       log(e);
       syntaxError(null);
-    } finally {
-      if (null != monitor) {
-        monitor.done();
-      }
     }
   }
   
@@ -188,15 +174,18 @@ public class SfApexDoc implements IRunnableWithProgress {
     }
   }
   
-  public static void showProgress(int units) {
-    if (null != monitor) {
-      monitor.worked(1);
-    }
-  }
-  
   
   //---------------------------------------------------------------------------
   // Helpers
+  public static void initProgress(int units) {
+    // progress (for each file: parse, write HTML)
+    monitor.beginTask("SfApexDoc - documenting Apex Class files...", units);
+  }
+  
+  public static void showProgress(int units) {
+    monitor.worked(1);
+  }
+  
   // return the specified file as a single string
   private static String getFileContents(String filePath) {
     String result = "", line = "";

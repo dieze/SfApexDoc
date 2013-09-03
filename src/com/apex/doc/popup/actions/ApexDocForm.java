@@ -1,7 +1,6 @@
 package com.apex.doc.popup.actions;
 
 import java.util.ArrayList;
-
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
@@ -24,7 +23,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-
 import apex.com.main.FileManager;
 import apex.com.main.SfApexDoc;
 
