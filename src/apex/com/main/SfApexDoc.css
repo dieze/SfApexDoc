@@ -138,3 +138,7 @@ h2.active {
 	padding:5px;
 	cursor:pointer;
 }
+pre {
+  font-size: 120%;
+  margin-left: 20px;
+}
