@@ -76,8 +76,8 @@ public class SfApexDocTest {
     assertEquals("p", SfApexDoc.parse("public class A {\n  \n public\tstring \tp ", scopes(new String[]{ "public" })).properties.get(0).getName());
     assertEquals("p", SfApexDoc.parse("public class A {\n  \n public \n string \n p; ", scopes(new String[]{ "public" })).properties.get(0).getName());
     assertEquals(2, SfApexDoc.parse("public class A {\n public String s; \n public String t;", scopes(new String[]{ "public" })).properties.size());
-    // TODO assertEquals("s", SfApexDoc.parse("public class A {\n public Integer s, t;", scopes(new String[]{ "public" })).properties.get(0).getName());
-    // TODO assertEquals(2, SfApexDoc.parse("public class A {\n public String s; public String t;", scopes(new String[]{ "public" })).properties.size());
+    assertEquals("s", SfApexDoc.parse("public class A {\n public Integer s, t;", scopes(new String[]{ "public" })).properties.get(0).getName());
+    assertEquals(2, SfApexDoc.parse("public class A {\n public String s; public String t;", scopes(new String[]{ "public" })).properties.size());
     
     assertEquals("PUBLIC string p", SfApexDoc.parse("public class A {\n PUBLIC string p", scopes(new String[]{ "public" })).properties.get(0).getNameLine());
     assertEquals("public string  p", SfApexDoc.parse("public class A {\n  \n public\tstring \tp ", scopes(new String[]{ "public" })).properties.get(0).getName());

@@ -1,7 +1,19 @@
 package com.apex.doc.popup.actions;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.dialogs.*;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -21,6 +33,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import apex.com.main.FileManager;
@@ -62,6 +76,14 @@ public class ApexDocForm extends ApplicationWindow {
     "The location of the documentation home page is: \n%s/" + 
     FileManager.ROOT_DIRECTORY + "/index.html\n\nWould you like to open it now?";
   
+  private static final String PREF_SRC   = "sourceDir=";
+  private static final String PREF_DEST  = "destDir=";
+  private static final String PREF_HOME  = "homeFile=";
+  private static final String PREF_AUTH  = "authorFile=";
+  private static final String PREF_SCOPE = "scope=";
+  
+  private static final String PREFS_FILE_NAME = "SfApexDocPrefs.txt";
+  
   
   //---------------------------------------------------------------------------
   // Properties
@@ -71,9 +93,9 @@ public class ApexDocForm extends ApplicationWindow {
   //---------------------------------------------------------------------------
   // Methods
   public ApexDocForm(Shell parentShell, String path) {
-	  super(parentShell);
-	  super.setShellStyle(SWT.CLOSE);
-	  this.path = path;
+    super(parentShell);
+    super.setShellStyle(SWT.CLOSE);
+    this.path = path;
   }
   
   protected Control createContents(Composite parent) {
@@ -121,7 +143,6 @@ public class ApexDocForm extends ApplicationWindow {
     toolkit.createLabel(form.getBody(), SCOPE_LABEL, SWT.NULL).setBackground(bg);
     GridData gd = new GridData(GridData.BEGINNING);
     gd.horizontalSpan = 2;
-    
     final ArrayList<Button> scopeButtons = new ArrayList<Button>();
     for (String s : SfApexDoc.SCOPES.keySet()) {
       scopeButtons.add(createScopeButton(toolkit, form, s, SfApexDoc.SCOPES.get(s), gd, bg));
@@ -139,6 +160,31 @@ public class ApexDocForm extends ApplicationWindow {
     mapButtonToText(homeFileButton, htmlFile, form, false);
     mapButtonToText(authorFileButton, authorFile, form, false);
     
+    // load saved preferences
+    try {
+      String line;
+      File f = new File(new File(getSelectedProjectPath()), PREFS_FILE_NAME);
+      BufferedReader reader = new BufferedReader(new FileReader(f));
+      while (null != (line = reader.readLine())) {
+        if (line.startsWith(PREF_SRC)) {
+          source.setText(line.substring(PREF_SRC.length()));
+        } else if (line.startsWith(PREF_DEST)) {
+          target.setText(line.substring(PREF_DEST.length()));
+        } else if (line.startsWith(PREF_HOME)) {
+          htmlFile.setText(line.substring(PREF_HOME.length()));
+        } else if (line.startsWith(PREF_AUTH)) {
+          authorFile.setText(line.substring(PREF_AUTH.length()));
+        } else if (line.startsWith(PREF_SCOPE)) {
+          final String[] scopes = line.substring(PREF_SCOPE.length()).split(SfApexDoc.SCOPE_SEP);
+          for (Button b : scopeButtons) {
+            b.setSelection(Arrays.asList(scopes).contains(b.getText()));
+          }
+        }
+      }
+      reader.close();
+    } catch (Exception e) {
+    }
+    
     // close when <ESC> is hit
     this.getShell().addListener(SWT.Traverse, new Listener() {
       public void handleEvent(Event event) {
@@ -151,51 +197,72 @@ public class ApexDocForm extends ApplicationWindow {
     buttonGenerate.addSelectionListener(new SelectionListener() {
       public void widgetDefaultSelected(SelectionEvent event) {}
       public void widgetSelected(SelectionEvent event) {
-      	try {
+        try {
           if (source.getText() != null) {
             SfApexDoc.args.add(SfApexDoc.SRC_ARG);
             SfApexDoc.args.add(source.getText());
           }
-        	if (target.getText() != null) {
-        	  SfApexDoc.args.add(SfApexDoc.TARG_ARG);
-        	  SfApexDoc.args.add(target.getText());
-        	}
+          if (target.getText() != null) {
+            SfApexDoc.args.add(SfApexDoc.TARG_ARG);
+            SfApexDoc.args.add(target.getText());
+          }
           if (authorFile.getText() != null) {
             SfApexDoc.args.add(SfApexDoc.AUTH_ARG);
             SfApexDoc.args.add(authorFile.getText());
           }
-        	if (htmlFile.getText() != null) {
-        	  SfApexDoc.args.add(SfApexDoc.HOME_ARG);
-        	  SfApexDoc.args.add(htmlFile.getText());
-        	}
-        	
-        	String scope = "";
-        	for (Button b : scopeButtons) {
-        	  if (b.getSelection()) {
-        	    scope += b.getText() + SfApexDoc.SCOPE_SEP;
-        	  }
-        	}
-        	if ("" != scope) {
-        	  SfApexDoc.args.add(SfApexDoc.SCOPE_ARG);
-        	  SfApexDoc.args.add(scope);
-        	}
-        	       		        	
-        	new ProgressMonitorDialog(form.getShell()).run(true, false, new SfApexDocPlugin()); 
-        	
-    			if (MessageDialog.openQuestion(form.getShell(), OPEN_PROMPT_TITLE,
-    			  String.format(OPEN_PROMPT, new Object[] {target.getText()}))) {
-    			  
-    				String strUrl = "file:///" + target.getText() + "/" + FileManager.ROOT_DIRECTORY + "/index.html";
-    				strUrl = strUrl.replaceAll(" ", "%20");
-    				strUrl = strUrl.replace('\\', '/');
-    				java.awt.Desktop.getDesktop().browse(new java.net.URI(strUrl));
-    			}
-			    
-    			form.getShell().dispose();
-      	} catch (Exception e) {
-      		e.printStackTrace();
-      		MessageDialog.openError(form.getShell(), "SfApexDoc Error", e.getMessage());
-      	}        	        	
+          if (htmlFile.getText() != null) {
+            SfApexDoc.args.add(SfApexDoc.HOME_ARG);
+            SfApexDoc.args.add(htmlFile.getText());
+          }
+          
+          String scope = "";
+          for (Button b : scopeButtons) {
+            if (b.getSelection()) {
+              scope += b.getText() + SfApexDoc.SCOPE_SEP;
+            }
+          }
+          if ("" != scope) {
+            SfApexDoc.args.add(SfApexDoc.SCOPE_ARG);
+            SfApexDoc.args.add(scope);
+          }
+          
+          // save preferences for next time
+          try {
+            File f = new File(new File(getSelectedProjectPath()), PREFS_FILE_NAME);
+            f.createNewFile();
+            BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+            writer.write(PREF_SRC + source.getText());      writer.newLine();
+            writer.write(PREF_DEST + target.getText());     writer.newLine();
+            writer.write(PREF_HOME + htmlFile.getText());   writer.newLine();
+            writer.write(PREF_AUTH + authorFile.getText()); writer.newLine();
+            String scopes = "";
+            for (Button b : scopeButtons) {
+              if (b.getSelection()) {
+                scopes += (scopes.isEmpty()? "" : SfApexDoc.SCOPE_SEP) + b.getText();
+              }
+            }
+            writer.write(PREF_SCOPE + scopes);
+            writer.close();
+          } catch (Exception e) {
+          }
+          
+          new ProgressMonitorDialog(form.getShell()).run(true, false, new SfApexDocPlugin()); 
+          
+          if (MessageDialog.openQuestion(form.getShell(), OPEN_PROMPT_TITLE,
+            String.format(OPEN_PROMPT, new Object[] {target.getText()}))) {
+            
+            String strUrl = "file:///" + target.getText() + "/" + FileManager.ROOT_DIRECTORY + "/index.html";
+            strUrl = strUrl.replaceAll(" ", "%20");
+            strUrl = strUrl.replace('\\', '/');
+            java.awt.Desktop.getDesktop().browse(new java.net.URI(strUrl));
+          }
+          
+          form.getShell().dispose();
+        } catch (Exception e) {
+          StringWriter trace = new StringWriter();
+          e.printStackTrace(new PrintWriter(trace));
+          MessageDialog.openError(form.getShell(), "SfApexDoc Error", e.getMessage() + trace.toString());
+        }
       }
     });
     
@@ -235,5 +302,19 @@ public class ApexDocForm extends ApplicationWindow {
           new FileDialog(form.getShell(), SWT.SAVE).open());
       }
     });
+  }
+  
+  private static String getSelectedProjectPath() {
+    IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+    if (null != window) {
+        IStructuredSelection selection = (IStructuredSelection)window.getSelectionService().getSelection();
+        Object firstElement = selection.getFirstElement();
+        if (firstElement instanceof IAdaptable) {
+            IProject project = (IProject)((IAdaptable)firstElement).getAdapter(IProject.class);
+            return project.getLocation().toString();
+        }
+    }
+    
+    return ".";
   }
 }

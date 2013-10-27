@@ -29,7 +29,7 @@ public class SfApexDocPlugin extends SfApexDoc implements IRunnableWithProgress 
     monitor.beginTask("SfApexDoc - documenting Apex Class files...", units);
   }
   
-  public void showProgress(int units) {
+  public void showProgress() {
     monitor.worked(1);
   }
 }

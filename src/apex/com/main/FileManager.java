@@ -143,10 +143,9 @@ public class FileManager {
   private String parseProjectDetail(String filePath) {
     String contents = "";
     try {
-      DataInputStream in = new DataInputStream(new FileInputStream(filePath));
-      BufferedReader br = new BufferedReader(new InputStreamReader(in));
+      BufferedReader reader = new BufferedReader(new FileReader(filePath));
       String line;
-      while ((line = br.readLine()) != null) {
+      while ((line = reader.readLine()) != null) {
         line = line.trim();
         int equalsPos = line.indexOf("=");
         String key = (equalsPos >= 0) ? line.substring(0, equalsPos).trim() : "";
@@ -157,6 +156,7 @@ public class FileManager {
           contents += value + "<br>";
         }
       }
+      reader.close();
     } catch (Exception e) {
       SfApexDoc.log("parseProjectDetail(" + filePath + "): " + e.getMessage());
     }
@@ -167,12 +167,12 @@ public class FileManager {
   private String parseHtmlFile(String filePath) {
     String contents = "";
     try {
-      DataInputStream in = new DataInputStream(new FileInputStream(filePath));
-      BufferedReader br = new BufferedReader(new InputStreamReader(in));
+      BufferedReader reader = new BufferedReader(new FileReader(filePath));
       String line;
-      while ((line = br.readLine()) != null) {
+      while ((line = reader.readLine()) != null) {
         contents += line.trim();
       }
+      reader.close();
     } catch (Exception e) {
       SfApexDoc.log("parseHtmlFile(" + filePath + "): " + e.getMessage());
     }
@@ -223,7 +223,7 @@ public class FileManager {
         dos.close();
         fos.close();
         
-        SfApexDoc.instance.showProgress(1);
+        SfApexDoc.instance.showProgress();
       }
       
       copyResources(path);

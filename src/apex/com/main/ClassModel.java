@@ -18,18 +18,24 @@ public class ClassModel extends Model {
   public ArrayList<MethodModel> methods = new ArrayList<MethodModel>();
   public ArrayList<PropertyModel> properties = new ArrayList<PropertyModel>();
   public final boolean isInterface;
+  public final ClassModel parent;
   
   
   //---------------------------------------------------------------------------
   // Methods
-  public ClassModel(String nameLine, ArrayList<String> comments) {
+  public ClassModel(ClassModel parent, String nameLine, ArrayList<String> comments) {
     super(nameLine.trim(), comments);
+    isInterface = getNameLine().matches("(^|.*\\s)interface\\s+.*");
+    
+    final String unqualifiedName = getName();
+    this.parent = parent;
     
     // add this as a 'type' we can link to
-    String name = getName();
-    addType(name, name + ".html");
-    
-    isInterface = getNameLine().matches("(^|.*\\s)interface\\s+.*");
+    addType(getName(), unqualifiedName + ".html");
+  }
+  
+  public ClassModel(String nameLine, ArrayList<String> comments) {
+    this(null, nameLine, comments);
   }
   
   public String getName() {
@@ -37,7 +43,7 @@ public class ClassModel extends Model {
     String[] words = getNameLine().split("\\s+");
     for (int i = 0; i < words.length; ++i) {
       if (((i + 1) < words.length) && (types.contains('|' + words[i].toLowerCase() + '|'))) {
-        return words[i + 1].replaceAll("\\W", "");
+        return (null != parent ? (parent.getName() + ".") : "") + words[i + 1].replaceAll("\\W", "");
       }
     }
     

@@ -63,6 +63,15 @@ public class ModelTest {
   }
 
   @Test
+  public void testClassAndSubclassLink() {
+    // use a derived type since 'getName' isn't provided for the base class
+    MethodModel m = new MethodModel("Name1 Name_0.subclass Name2", new ArrayList<String>());
+    m.addType("name_0.subclass", "Link");
+    m.addLinks();
+    assertEquals("link was not applied", "Name1 <a href='link'>Name_0.subclass</a> Name2", m.getNameLine());
+  }
+
+  @Test
   public void testLinkInCollection() {
     // use a derived type since 'getName' isn't provided for the base class
     MethodModel m = new MethodModel("Set<Name1> List<Name_0> Name2[]", new ArrayList<String>());
@@ -199,6 +208,29 @@ public class ModelTest {
     Model m = new Model("", comments);
     assertEquals("author", "me you", m.getAuthor());
     assertEquals("description", "first one second one", m.getDescription());
+  }
+  
+  @Test
+  public void testEmptyPreTag() {
+    ArrayList<String> comments = new ArrayList<String>();
+    comments.add("before");
+    comments.add("<pre>");
+    comments.add("</pre>");
+    comments.add("after");
+    Model m = new Model("", comments);
+    assertEquals("description", "before <pre>\n</pre> after", m.getDescription());
+  }
+  
+  @Test
+  public void testNonEmptyPreTag() {
+    ArrayList<String> comments = new ArrayList<String>();
+    comments.add("<pre>");
+    comments.add(" void foo() { ");
+    comments.add("    return;");
+    comments.add(" }");
+    comments.add("</pre>");
+    Model m = new Model("", comments);
+    assertEquals("description", "<pre>\nvoid foo() {\nreturn;\n}\n</pre>", m.getDescription());
   }
   
   private void assertBlankComment(Model m) {

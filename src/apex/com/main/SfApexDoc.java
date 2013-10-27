@@ -1,11 +1,9 @@
 package apex.com.main;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
+import java.io.FileReader;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ import java.util.Map;
 public class SfApexDoc {
   //---------------------------------------------------------------------------
   // Constants
-  public static final String VERSION = "1.1.0";
+  public static final String VERSION = "1.1.1";
   private static final String LOG_FILE_NAME = "SfApexDocLog.txt";
   private static final String DEFAULT_EXT = "cls";
   
@@ -62,7 +60,6 @@ public class SfApexDoc {
   //---------------------------------------------------------------------------
   // Constructor
   public SfApexDoc() {
-    SfApexDoc.assertPrecondition(null == instance); // singleton
     instance = this;
   }
   
@@ -134,13 +131,13 @@ public class SfApexDoc {
             Collections.sort(m.methods, new ModelComparer());
             models.add(m);
           } else {
-            showProgress(1); // we won't be creating docs for this
+            showProgress(); // we won't be creating docs for this
           }
         } else {
-          showProgress(1); // we won't be creating docs for this
+          showProgress(); // we won't be creating docs for this
         }
         
-        showProgress(1);
+        showProgress();
       }
       
       new FileManager(destDir).createDocs(models, authorFile, homeFile);
@@ -176,18 +173,17 @@ public class SfApexDoc {
   //---------------------------------------------------------------------------
   // Helpers
   public void initProgress(int units) {}
-  public void showProgress(int units) {}
+  public void showProgress() {}
   
   // return the specified file as a single string
   private static String getFileContents(String filePath) {
     String result = "", line = "";
     try {
-      InputStreamReader in = new InputStreamReader(new DataInputStream(new FileInputStream(filePath)));
-      BufferedReader reader = new BufferedReader(in);
+      BufferedReader reader = new BufferedReader(new FileReader(filePath));
       while (null != (line = reader.readLine())) {
         result += line + '\n';
       }
-      in.close();
+      reader.close();
     } catch (Exception e) {
       log("Exception loading file: " + filePath);
     }
@@ -198,7 +194,7 @@ public class SfApexDoc {
   // Parse the specified text; see inline comments for specific rules
   // public only for testing
   public static ClassModel parse(String text, ArrayList<String> scope) {
-    ClassModel model = null;
+    ClassModel /*parentClass = null,*/ model = null;
     String line = "", prevLine = null;
     int lineIndex = 0;
     try {
@@ -258,7 +254,9 @@ public class SfApexDoc {
                   model = new ClassModel(line, comments);
                   comments.clear();
                 } else if (hasScope || lineContainsScope(DEF_VISIBILITY, scope)) {
-                  // nested class
+                  // TODO nested class
+                  //parentClass = model;
+                  //model = new ClassModel(parentClass, line, comments);
                   comments.clear();
                 }
               } else if ((null != model) && line.contains("(")) {
