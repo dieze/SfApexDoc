@@ -20,7 +20,7 @@ import java.util.Map;
 public class SfApexDoc {
   //---------------------------------------------------------------------------
   // Constants
-  public static final String VERSION = "1.1.1";
+  public static final String VERSION = "1.2.0";
   private static final String LOG_FILE_NAME = "SfApexDocLog.txt";
   private static final String DEFAULT_EXT = "cls";
   
@@ -127,8 +127,6 @@ public class SfApexDoc {
         if (f.isFile() && f.getAbsolutePath().toLowerCase().endsWith("." + ext)) {
           ClassModel m = parse(getFileContents(f.getAbsolutePath()), scope);
           if (null != m) {
-            Collections.sort(m.properties, new ModelComparer());
-            Collections.sort(m.methods, new ModelComparer());
             models.add(m);
           } else {
             showProgress(); // we won't be creating docs for this
@@ -194,9 +192,9 @@ public class SfApexDoc {
   // Parse the specified text; see inline comments for specific rules
   // public only for testing
   public static ClassModel parse(String text, ArrayList<String> scope) {
-    ClassModel /*parentClass = null,*/ model = null;
+    ClassModel parentClass = null, model = null;
     String line = "", prevLine = null;
-    int lineIndex = 0;
+    int lineIndex = 0, nestedCurlyBraceDepth = 0;
     try {
       boolean commentsStarted = false;
       ArrayList<String> comments = new ArrayList<String>();
@@ -204,7 +202,7 @@ public class SfApexDoc {
       BufferedReader reader = new BufferedReader(new StringReader(text));
       while (null != (line = reader.readLine())) {
         ++lineIndex;
-
+        
         // ignore anything after // style comments. This allows hiding of tokens from ApexDoc
         int i = line.indexOf("//");
         if (i > -1) {
@@ -230,6 +228,10 @@ public class SfApexDoc {
           } else if (commentsStarted) {
             comments.add(line);
           } else {
+            final int openCurlies = countChars(line, '{'), closeCurlies = countChars(line, '}');
+            nestedCurlyBraceDepth += openCurlies;
+            nestedCurlyBraceDepth -= closeCurlies;
+            
             if (null != prevLine) {
               line = prevLine + ' ' + line;
               prevLine = null;
@@ -254,9 +256,15 @@ public class SfApexDoc {
                   model = new ClassModel(line, comments);
                   comments.clear();
                 } else if (hasScope || lineContainsScope(DEF_VISIBILITY, scope)) {
-                  // TODO nested class
-                  //parentClass = model;
-                  //model = new ClassModel(parentClass, line, comments);
+                  // nested class
+                  parentClass = model;
+                  model = new ClassModel(parentClass, line, comments);
+                  parentClass.children.add(model);
+                  if ((openCurlies > 0) && (openCurlies == closeCurlies)) {
+                    // this is a one-line class declaration; back to the parent
+                    model = parentClass;
+                    parentClass = null;
+                  }
                   comments.clear();
                 }
               } else if ((null != model) && line.contains("(")) {
@@ -269,6 +277,10 @@ public class SfApexDoc {
                 if (hasScope) {
                   // property, enum
                   model.properties.add(new PropertyModel(line, comments));
+                } else if ((null != parentClass) && (1 == nestedCurlyBraceDepth)) {
+                  // this is the end of the nested class; back to the parent
+                  model = parentClass;
+                  parentClass = null;
                 }
                 comments.clear();
               }
@@ -280,10 +292,14 @@ public class SfApexDoc {
         }
       }
       
-      debug(model);
+      if (null != model) {
+        Collections.sort(model.properties, new ModelComparer());
+        Collections.sort(model.methods, new ModelComparer());
+        debug(model);
+      }
     } catch (Exception e) {
       model = null;
-      log("Exception parsing line "+ lineIndex + ": " + line);
+      log("Exception parsing line "+ lineIndex + ": " + line + "; " + e.getMessage());
     }
     
     return model;
@@ -351,5 +367,17 @@ public class SfApexDoc {
     log(message);
     log("");
     System.exit(-1);        
+  }
+  
+  /** Count the number of occurrences of 'needle' in 'haystack' */
+  private static int countChars(String haystack, char needle) {
+    int count = 0;
+    for (int i = 0; i < haystack.length(); ++i) {
+      if (haystack.charAt(i) == needle) {
+        ++count;
+      }
+    }
+    
+    return count;
   }
 }

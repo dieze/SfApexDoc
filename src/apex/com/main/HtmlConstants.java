@@ -5,13 +5,13 @@ public class HtmlConstants {
   // Constants
   public static final String HEADER_CLOSE = "</td></tr></table></div>";
   
-  public static final String FOOTER = "</div></div></td></tr></table><hr/><center style='font-size:10px;'>" +
+  public static final String FOOTER = "</div></div></td></tr></table><hr/><center id='footer'>" +
     "<a href='https://gitlab.com/StevenWCox/sfapexdoc/wikis/Home'>Powered By SfApexDoc version " +
     SfApexDoc.VERSION + "</a></center></body></html>";
   
   public static final String DEFAULT_HOME_CONTENTS = "<h1>Project Home</h2><p>(specify a -home parameter to override this)</p>";
   
-  public static final String DEFAULT_PROJECT_DETAIL = "<h2 style='margin:0px;'>Project Demo</h2>" +
+  public static final String DEFAULT_PROJECT_DETAIL = "<h2>Project Demo</h2>" +
     "(specify an -author parameter to override this)<br/>" +
     "<a href='https://gitlab.com/StevenWCox/sfapexdoc/wikis/Home'>(GitLab project)</a><br/>";
   
@@ -40,9 +40,9 @@ public class HtmlConstants {
         "return (ctrl.value == '-');" +
       "}\n" +
       
-      "function ToggleAll() {" +
+      "function ToggleAll(e) {" +
         "var cExpanded = 0;" +
-        "$('h2.trigger').each(function() {" +
+        "$('h2.trigger', $(e).closest('tr')).each(function() {" +
           "if (!IsExpanded(this.firstChild)) {" +
             "$(this).toggleClass('active').next().slideToggle('fast');" +
             "ToggleBtnLabel(this.firstChild);" +
@@ -51,7 +51,7 @@ public class HtmlConstants {
         "});" +
         
         "if (cExpanded == 0) {" +
-          "$('h2.trigger').each(function() {" +
+          "$('h2.trigger', $(e).closest('tr')).each(function() {" +
             "$(this).toggleClass('active').next().slideToggle('fast');" +
             "ToggleBtnLabel(this.firstChild);" +
           "});" +
@@ -61,10 +61,10 @@ public class HtmlConstants {
   "</head>" +
   
   "<body>" +
-  "<div class='topsection'>" +
+  "<div class='topSection'>" +
     "<table>" +
       "<tr><td>" +
-          "<img src='apex_doc_logo.png' style='border:1px solid #000;'/>" +
+          "<img src='apex_doc_logo.png'/>" +
         "</td>" +
         "<td>";
 }
