@@ -67,7 +67,7 @@ public class SfApexDoc {
   //---------------------------------------------------------------------------
   // Methods
   /**
-   * Entry point for SfApexDoc. Invoke this from a command line 
+   * Entry point for SfApexDoc. Invoke this from a command line
    * interface, ANT script, etc. Parameters are documented in the 'syntaxError'
    * method below.
    */
@@ -203,12 +203,14 @@ public class SfApexDoc {
       while (null != (line = reader.readLine())) {
         ++lineIndex;
         
-        // ignore anything after // style comments. This allows hiding of tokens from ApexDoc
         int i = line.indexOf("//");
-        if (i > -1) {
-          // ignore segments that could be links (i.e. http://www...)
-          if ((0 == i) || (':' != line.charAt(i - 1))) {
-            line = line.substring(0, i);
+        if (!commentsStarted) {
+          // ignore anything after // style comments. This allows hiding of tokens from ApexDoc
+          if (i > -1) {
+            // ignore segments that could be links (i.e. http://www...)
+            if ((0 == i) || (':' != line.charAt(i - 1))) {
+              line = line.substring(0, i);
+            }
           }
         }
         
@@ -366,7 +368,7 @@ public class SfApexDoc {
   private static void bail(String message) {
     log(message);
     log("");
-    System.exit(-1);        
+    System.exit(-1);
   }
   
   /** Count the number of occurrences of 'needle' in 'haystack' */

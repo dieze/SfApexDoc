@@ -40,7 +40,7 @@ public class ModelTest {
     // use a derived type since 'getName' isn't provided for the base class
     MethodModel m = new MethodModel("Name1 Name_0 Name2", new ArrayList<String>());
     m.addLinks();
-    assertEquals("no links", "Name1 Name_0 Name2", m.getNameLine());
+    assertEquals("no links", "Name1 <a href='link'>Name_0</a> Name2", m.getNameLine());
   }
 
   @Test
@@ -50,7 +50,7 @@ public class ModelTest {
     m.addType("Nam", "Link");
     m.addType("Name3", "Link");
     m.addLinks();
-    assertEquals("no links", "Name1 Name_0 Name2", m.getNameLine());
+    assertEquals("no links", "Name1 <a href='link'>Name_0</a> Name2", m.getNameLine());
   }
 
   @Test
@@ -225,12 +225,13 @@ public class ModelTest {
   public void testNonEmptyPreTag() {
     ArrayList<String> comments = new ArrayList<String>();
     comments.add("<pre>");
+    comments.add("* // a sample class");
     comments.add(" void foo() { ");
     comments.add("    return;");
     comments.add(" }");
     comments.add("</pre>");
     Model m = new Model("", comments);
-    assertEquals("description", "<pre>\nvoid foo() {\nreturn;\n}\n</pre>", m.getDescription());
+    assertEquals("description", "<pre>\n // a sample class\nvoid foo() {\nreturn;\n}\n</pre>", m.getDescription());
   }
   
   private void assertBlankComment(Model m) {
