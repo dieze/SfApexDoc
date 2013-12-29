@@ -6,7 +6,7 @@ import java.util.*;
 /**
  * Utility class for parsing text files and constructing the HTML
  * documentation files.
- * 
+ *
  * @author Steve Cox
  */
 public class FileManager {
@@ -48,7 +48,7 @@ public class FileManager {
     
     String links = "<table width='100%'><tr>" + getPageLinks(models);
     homeContents = links + "<td><h2 class='section-title'>Home</h2>" + homeContents + "</td>";
-    homeContents = HtmlConstants.HEADER_OPEN + projectDetail + HtmlConstants.HEADER_CLOSE + 
+    homeContents = HtmlConstants.HEADER_OPEN + projectDetail + HtmlConstants.HEADER_CLOSE +
       homeContents + HtmlConstants.FOOTER;
     
     Hashtable<String, String> classHashTable = new Hashtable<String, String>();
@@ -65,7 +65,7 @@ public class FileManager {
         final String fileName = model.getName();
         contents += createClassDoc(model, fileName) + children;
         
-        classHashTable.put(fileName, HtmlConstants.HEADER_OPEN + projectDetail + 
+        classHashTable.put(fileName.toLowerCase(), HtmlConstants.HEADER_OPEN + projectDetail +
           HtmlConstants.HEADER_CLOSE + contents + HtmlConstants.FOOTER);
       }
     }
@@ -76,8 +76,8 @@ public class FileManager {
   private String createClassDoc(ClassModel model, String fileName) {
     model.addLinks();
     String contents = "<td class='classCell'>";
-    contents += 
-      "<h2 class='section-title'>" + fileName + 
+    contents +=
+      "<h2 class='section-title'>" + fileName +
         "<span><input type='button' value='+/- all' onclick='ToggleAll(this);' /></span>" +
       "</h2>" +
       "<div class='toggle_container_subtitle'>" + model.getNameLine() + "</div>" +
@@ -90,7 +90,7 @@ public class FileManager {
     
     if (!model.properties.isEmpty()) {
       contents += "<p></p>" +
-        "<h2 class='trigger'><input type='button' value='+'/>&nbsp;&nbsp;<a href='#'>Properties</a></h2>" + 
+        "<h2 class='trigger'><input type='button' value='+'/>&nbsp;&nbsp;<a href='#'>Properties</a></h2>" +
         "<div class='toggle_container'> " +
           "<table class='properties' border='1' rules='all' cellpadding='6'> ";
       
@@ -99,7 +99,7 @@ public class FileManager {
         prop.addLinks();
         contents += "<tr><td class='clsPropertyName'>" + name + "</td>" +
           "<td><div class='clsPropertyDeclaration'>" + prop.getNameLine() + "</div>" +
-          "<div class='clsPropertyDescription'>" + prop.getDescription() +  
+          "<div class='clsPropertyDescription'>" + prop.getDescription() +
             (prop.getAuthor().isEmpty() && prop.getDate().isEmpty()? "" : " (" + prop.getAuthor() + " " + prop.getDate() + ")") +
             (prop.getSee().isEmpty() ? "" : " see " + prop.getSee()) +
           "</div></tr>";
@@ -116,7 +116,7 @@ public class FileManager {
         contents += "<h2 class='trigger'><input type='button' value='+'/>&nbsp;&nbsp;<a href='#'>" + name + "</a></h2>" +
           "<div class='toggle_container'>" +
           "<div class='toggle_container_subtitle'>" + method.getNameLine() + "</div>" +
-          "<table class='details' rules='all' border='1' cellpadding='6'>" + 
+          "<table class='details' rules='all' border='1' cellpadding='6'>" +
           (method.getDescription() != "" ? "<tr><th>Description</th><td>" + method.getDescription() + "</td></tr> " : "") +
           (method.getAuthor() != "" ? "<tr><th>Author</th><td>" + method.getAuthor() + "</td></tr> " : "") +
           (method.getDate() != "" ? "<tr><th>Date</th><td>" + method.getDate() + "</td></tr> " : "") +
@@ -246,7 +246,7 @@ public class FileManager {
     for (ClassModel model : models) {
       String name;
       if (!(name = model.getName()).isEmpty()) {
-        links += "<div onclick=\"gotomenu('" + name + ".html');\">" + name + "</div>";
+        links += "<div onclick=\"gotomenu('" + name.toLowerCase() + ".html');\">" + name + "</div>";
       }
     }
     return links + "</td>";

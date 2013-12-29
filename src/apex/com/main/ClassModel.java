@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 /**
  * Apex class and interface information
- * 
+ *
  * @author Steve Cox
  */
 public class ClassModel extends Model {
@@ -28,7 +28,7 @@ public class ClassModel extends Model {
     super(nameLine.trim(), comments);
     isInterface = getNameLine().matches("(^|.*\\s)interface\\s+.*");
     
-    final String unqualifiedName = getName();
+    final String unqualifiedName = getName().toLowerCase();
     this.parent = parent;
     
     // add this as a 'type' we can link to
