@@ -20,6 +20,7 @@ public class ClassModel extends Model {
   public ArrayList<PropertyModel> properties = new ArrayList<PropertyModel>();
   public ArrayList<ClassModel> children = new ArrayList<ClassModel>();
   public final ClassModel parent;
+  public boolean inScope = true;
   
   
   //---------------------------------------------------------------------------

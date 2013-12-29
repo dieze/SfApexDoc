@@ -121,6 +121,11 @@ public class SfApexDocTest {
     m = SfApexDoc.parse("public class A {\n public class B \n{\n} \n}", publicScope);
     assertEquals("A", m.getName());
     assertEquals("A.B", m.children.get(0).getName());
+    
+    // ignore in-scope members of an out-of-scope nested class
+    m = SfApexDoc.parse("public class A {\n private class B \n{\n public int i;\n } \n}", publicScope);
+    assertEquals(0, m.children.size());
+    assertEquals(0, m.properties.size());
   }
 
   @Test

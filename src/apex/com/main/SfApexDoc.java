@@ -257,11 +257,16 @@ public class SfApexDoc {
                   if (!hasScope) break;  // must be a test class - skip it
                   model = new ClassModel(line, comments);
                   comments.clear();
-                } else if (hasScope || lineContainsScope(DEF_VISIBILITY, scope)) {
+                } else {
                   // nested class
                   parentClass = model;
                   model = new ClassModel(parentClass, line, comments);
-                  parentClass.children.add(model);
+                  if (hasScope) {
+                    parentClass.children.add(model);
+                  } else {
+                    model.inScope = hasScope;
+                  }
+                  
                   if ((openCurlies > 0) && (openCurlies == closeCurlies)) {
                     // this is a one-line class declaration; back to the parent
                     model = parentClass;
@@ -294,7 +299,7 @@ public class SfApexDoc {
         }
       }
       
-      if (null != model) {
+      if ((null != model) && model.inScope) {
         Collections.sort(model.properties, new ModelComparer());
         Collections.sort(model.methods, new ModelComparer());
         debug(model);
