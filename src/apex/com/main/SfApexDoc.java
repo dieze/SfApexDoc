@@ -20,7 +20,7 @@ import java.util.Map;
 public class SfApexDoc {
   //---------------------------------------------------------------------------
   // Constants
-  public static final String VERSION = "1.2.0";
+  public static final String VERSION = "1.2.1";
   private static final String LOG_FILE_NAME = "SfApexDocLog.txt";
   private static final String DEFAULT_EXT = "cls";
   
@@ -34,9 +34,9 @@ public class SfApexDoc {
   public static final String SCOPE_SEP = ",";
   private static final String END_OF_SIGNATURE = "{}=;";
   
-  private static final String COMMENT_START = "/**";
+  private static final String COMMENT_START = "/*";
+  private static final String DOC_COMMENT_START = "/**";
   private static final String COMMENT_END = "*/";
-  private static final String DEF_VISIBILITY = "private";
   
   public static final String SRC_ARG   = "-s";
   public static final String TARG_ARG  = "-t";
@@ -196,7 +196,7 @@ public class SfApexDoc {
     String line = "", prevLine = null;
     int lineIndex = 0, nestedCurlyBraceDepth = 0;
     try {
-      boolean commentsStarted = false;
+      boolean commentsStarted = false, inDocComment = false;
       ArrayList<String> comments = new ArrayList<String>();
        
       BufferedReader reader = new BufferedReader(new StringReader(text));
@@ -218,17 +218,22 @@ public class SfApexDoc {
         if (line.length() > 0) {
           // gather up our comments
           if (line.startsWith(COMMENT_START)) {
+            inDocComment = line.startsWith(DOC_COMMENT_START);
             comments.clear();
             // check for single-line block comment
             if (line.endsWith(COMMENT_END)) {
-              comments.add(line.substring(COMMENT_START.length(), line.length() - COMMENT_END.length()));
+              if (inDocComment) {
+                comments.add(line.substring(DOC_COMMENT_START.length(), line.length() - COMMENT_END.length()));
+              }
             } else {
               commentsStarted = true;
             }
           } else if (commentsStarted && line.endsWith(COMMENT_END)) {
-            commentsStarted = false;
+            commentsStarted = inDocComment = false;
           } else if (commentsStarted) {
-            comments.add(line);
+            if (inDocComment) {
+              comments.add(line);
+            }
           } else {
             final int openCurlies = countChars(line, '{'), closeCurlies = countChars(line, '}');
             nestedCurlyBraceDepth += openCurlies;
@@ -261,14 +266,14 @@ public class SfApexDoc {
                   // nested class
                   parentClass = model;
                   model = new ClassModel(parentClass, line, comments);
-                  if (hasScope) {
+                  model.inScope = hasScope;
+                  if (model.inScope) {
                     parentClass.children.add(model);
-                  } else {
-                    model.inScope = hasScope;
                   }
                   
                   if ((openCurlies > 0) && (openCurlies == closeCurlies)) {
                     // this is a one-line class declaration; back to the parent
+                    processCompleteModel(model);
                     model = parentClass;
                     parentClass = null;
                   }
@@ -286,6 +291,7 @@ public class SfApexDoc {
                   model.properties.add(new PropertyModel(line, comments));
                 } else if ((null != parentClass) && (1 == nestedCurlyBraceDepth)) {
                   // this is the end of the nested class; back to the parent
+                  processCompleteModel(model);
                   model = parentClass;
                   parentClass = null;
                 }
@@ -299,11 +305,7 @@ public class SfApexDoc {
         }
       }
       
-      if ((null != model) && model.inScope) {
-        Collections.sort(model.properties, new ModelComparer());
-        Collections.sort(model.methods, new ModelComparer());
-        debug(model);
-      }
+      processCompleteModel(model);
     } catch (Exception e) {
       model = null;
       log("Exception parsing line "+ lineIndex + ": " + line + "; " + e.getMessage());
@@ -312,6 +314,14 @@ public class SfApexDoc {
     return model;
   }
   
+  private static void processCompleteModel(ClassModel model) {
+    if ((null != model) && model.inScope) {
+      Collections.sort(model.properties, new ModelComparer());
+      Collections.sort(model.methods, new ModelComparer());
+      debug(model);
+    }
+  }
+
   // return true if 'line' contains one of the visibility scopes we're looking for
   private static boolean lineContainsScope(String line, ArrayList<String> scope) {
     SfApexDoc.assertPrecondition(null != line);
@@ -363,7 +373,7 @@ public class SfApexDoc {
     log("  (t)arget_folder - The folder where HTML files will be created");
     log("  (h)omefile      - Contents for the home page right panel");
     log("  (a)uthorfile    - File containing project information for the header");
-    log("  sco(p)e         - Semicolon-seperated list of scopes to document. Defaults to 'global;public'");
+    log("  sco(p)e         - Comma-seperated list of scopes to document. Defaults to 'global,public'");
     log("  e(x)tension     - Extension of files to parse. Defaults to 'cls'");
     
     bail(null);

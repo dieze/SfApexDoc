@@ -8,8 +8,13 @@ import org.junit.Test;
 import apex.com.main.SfApexDoc;
 
 public class SfApexDocTest {
+  //---------------------------------------------------------------------------
+  // Constants
   final ArrayList<String> publicScope = scopes(new String[]{ "public" });
   
+  
+  //---------------------------------------------------------------------------
+  // Tests
   @Test
   public void testNoClass() {
     assertNull(SfApexDoc.parse("", scopes(new String[]{})));
@@ -86,6 +91,14 @@ public class SfApexDocTest {
   }
   
   @Test
+  public void testSortProperties() {
+    ClassModel m = SfApexDoc.parse("public class A {\n public string p2; \n public string p1;", publicScope);
+    assertEquals(2, m.properties.size());
+    assertEquals("p1", m.properties.get(0).getName());
+    assertEquals("p2", m.properties.get(1).getName());
+  }
+  
+  @Test
   public void testEnum() {
     assertEquals("e", SfApexDoc.parse("public class A {\n PUBLIC enum e;", publicScope).properties.get(0).getName());
     assertEquals("e", SfApexDoc.parse("public class A {\n  public ENUM  e{", publicScope).properties.get(0).getName());
@@ -109,6 +122,14 @@ public class SfApexDocTest {
   }
   
   @Test
+  public void testSortMethods() {
+    ClassModel m = SfApexDoc.parse("public class A {\n public string p2(); \n public string p1();", publicScope);
+    assertEquals(2, m.methods.size());
+    assertEquals("p1", m.methods.get(0).getName());
+    assertEquals("p2", m.methods.get(1).getName());
+  }
+  
+  @Test
   public void testNestedClass() {
     ClassModel m = SfApexDoc.parse("public class A {\n public class B {} \n}", publicScope);
     assertEquals("A", m.getName());
@@ -127,23 +148,65 @@ public class SfApexDocTest {
     assertEquals(0, m.children.size());
     assertEquals(0, m.properties.size());
   }
-
+  
+  @Test
+  public void testNestedClassSortProperties() {
+    ClassModel m = SfApexDoc.parse("public class A {\n public class B {\n public string p2; \n public string p1;\n }\n }", publicScope);
+    assertEquals(2, m.children.get(0).properties.size());
+    assertEquals("p1", m.children.get(0).properties.get(0).getName());
+    assertEquals("p2", m.children.get(0).properties.get(1).getName());
+  }
+  
+  @Test
+  public void testNestedClassSortMethods() {
+    ClassModel m = SfApexDoc.parse("public class A {\n public class B {\n public string p2(); \n public string p1();\n }\n }", publicScope);
+    assertEquals(2, m.children.get(0).methods.size());
+    assertEquals("p1", m.children.get(0).methods.get(0).getName());
+    assertEquals("p2", m.children.get(0).methods.get(1).getName());
+  }
+  
   @Test
   public void testClassWithComments() {
-    assertCommentAndClass(SfApexDoc.parse("/** comment */ \n public class A{", publicScope));
-    assertCommentAndClass(SfApexDoc.parse("/** \n * comment \n */ \n \t\n public class A {", publicScope));
-    assertCommentAndClass(SfApexDoc.parse("/** \n * comment \n */ \n \t\n public class A { ", publicScope));
-    assertCommentAndClass(SfApexDoc.parse(" /** comment */ \n @future \n public \n class \n A \n{", publicScope));
+    assertCommentAndClass("comment", "A", SfApexDoc.parse("/** comment */ \n public class A{", publicScope));
+    assertCommentAndClass("comment", "A", SfApexDoc.parse("/** \n * comment \n */ \n \t\n public class A {", publicScope));
+    assertCommentAndClass("comment", "A", SfApexDoc.parse("/** \n * comment \n */ \n \t\n public class A { ", publicScope));
+    assertCommentAndClass("comment", "A", SfApexDoc.parse(" /** comment */ \n @future \n public \n class \n A \n{", publicScope));
+  }
+  
+  @Test
+  public void testClassWithNonDocComments() {
+    assertCommentAndClass("", "A", SfApexDoc.parse("/* comment */ \n public class A{", publicScope));
+    assertCommentAndClass("", "A", SfApexDoc.parse("/* \n * comment \n */ \n \t\n public class A {", publicScope));
+    assertCommentAndClass("", "A", SfApexDoc.parse(" /* comment */ \n @future \n public \n class \n A \n{", publicScope));
+    //TODO handle comments within a line e.g. "public /*class*/ interface A"
+  }
+  
+  @Test
+  public void testClassWithSingleLineComments() {
+    assertCommentAndClass("", "A", SfApexDoc.parse("// comment \n public class A{", publicScope));
+    assertCommentAndClass("", "A", SfApexDoc.parse("// \n * comment \n \t\n public class A {", publicScope));
+    assertCommentAndClass("", "A", SfApexDoc.parse(" // comment \n @future \n public \n class \n A \n{", publicScope));
   }
   
   @Test
   public void testPropertyWithComments() {
-    assertCommentAndProperty(SfApexDoc.parse("public class A {\n /** comment */ \n public \n Id \n p \n {", publicScope));
+    assertCommentClassAndProperty("comment", "A", "p", SfApexDoc.parse("public class A {\n /** comment */ \n public \n Id \n p \n {", publicScope));
+  }
+  
+  @Test
+  public void testPropertyWithNonDocComments() {
+    assertCommentClassAndProperty("", "A", "p", SfApexDoc.parse("public class A {\n /* comment */ \n public \n Id \n p \n {", publicScope));
+  }
+  
+  @Test
+  public void testPropertyWithSingleLineComments() {
+    assertCommentClassAndProperty("", "A", "p", SfApexDoc.parse("public class A {\n // comment \n public \n Id \n p \n {", publicScope));
   }
 
   @Test
   public void testMethodWithComments() {
-    String test = "/**\n"+
+    String test =
+   "/**\n"+
     "* This is the parent class for models. Model classes should contain... \n"+
     "*/\n"+
       "public abstract with sharing class SF_Base {\n"+
@@ -175,23 +238,21 @@ public class SfApexDocTest {
     assertEquals("id", m.properties.get(0).getName());
     assertEquals(1, m.methods.size());
   }
-
-  @Test
-  public void testNestedClassWithComments() {
-    // TODO
-  }
-
-  private void assertCommentAndClass(ClassModel m) {
+  
+  
+  //---------------------------------------------------------------------------
+  // Helpers
+  private void assertCommentAndClass(String comment, String theClass, ClassModel m) {
     assertNotNull(m);
-    assertEquals("A", m.getName());
-    assertEquals("comment", m.getDescription());
+    assertEquals(comment, m.getDescription());
+    assertEquals(theClass, m.getName());
   }
   
-  private void assertCommentAndProperty(ClassModel m) {
+  private void assertCommentClassAndProperty(String comment, String theClass, String property, ClassModel m) {
     assertNotNull(m);
-    assertEquals("A", m.getName());
-    assertEquals("comment", m.properties.get(0).getDescription());
-    assertEquals("p", m.properties.get(0).getName());
+    assertEquals(comment, m.properties.get(0).getDescription());
+    assertEquals(theClass, m.getName());
+    assertEquals(property, m.properties.get(0).getName());
   }
   
   private ArrayList<String> scopes(String[] s) {
