@@ -42,6 +42,9 @@ body{
   font-size: .9em;
 }
 
+tr {
+  vertical-align: top;
+}
 
 /* details is used for displaying the apexdoc values like author, date, description, params, return value, etc. */
 .details {

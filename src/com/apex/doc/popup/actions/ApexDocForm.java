@@ -71,9 +71,9 @@ public class ApexDocForm extends ApplicationWindow {
   
   private static final String BROWSE_BUTTON_LABEL = "...";
   
-  private static final String OPEN_PROMPT_TITLE = "SfApexDoc Generation Results"; 
+  private static final String OPEN_PROMPT_TITLE = "SfApexDoc Generation Results";
   private static final String OPEN_PROMPT = "SfApexDoc has completed successfully.\n" +
-    "The location of the documentation home page is: \n%s/" + 
+    "The location of the documentation home page is: \n%s/" +
     FileManager.ROOT_DIRECTORY + "/index.html\n\nWould you like to open it now?";
   
   private static final String PREF_SRC   = "sourceDir=";
@@ -123,19 +123,19 @@ public class ApexDocForm extends ApplicationWindow {
     form.getBody().setLayout(new GridLayout(3, false));
     
     // create the text controls and lookup buttons
-    final Text source = createFileLookup(toolkit, form, SRC_LABEL, path + SRC_SUBDIR, 
+    final Text source = createFileLookup(toolkit, form, SRC_LABEL, path + SRC_SUBDIR,
       GridData.FILL_HORIZONTAL, SRC_TOOLTIP, bg);
     Button sourceButton = createLookupButton(toolkit, form);
     
-    final Text target = createFileLookup(toolkit, form, TARG_LABEL, path, 
+    final Text target = createFileLookup(toolkit, form, TARG_LABEL, path,
       GridData.FILL_HORIZONTAL, TARG_TOOLTIP, bg);
     Button targetButton = createLookupButton(toolkit, form);
     
-    final Text htmlFile = createFileLookup(toolkit, form, HOME_LABEL, "", 
+    final Text htmlFile = createFileLookup(toolkit, form, HOME_LABEL, "",
       GridData.FILL_HORIZONTAL, HOME_TOOLTIP, bg);
     Button homeFileButton = createLookupButton(toolkit, form);
     
-    final Text authorFile = createFileLookup(toolkit, form, AUTH_LABEL, "", 
+    final Text authorFile = createFileLookup(toolkit, form, AUTH_LABEL, "",
       GridData.FILL_HORIZONTAL, AUTH_TOOLTIP, bg);
     Button authorFileButton = createLookupButton(toolkit, form);
     
@@ -246,7 +246,7 @@ public class ApexDocForm extends ApplicationWindow {
           } catch (Exception e) {
           }
           
-          new ProgressMonitorDialog(form.getShell()).run(true, false, new SfApexDocPlugin()); 
+          new ProgressMonitorDialog(form.getShell()).run(true, false, new SfApexDocPlugin());
           
           if (MessageDialog.openQuestion(form.getShell(), OPEN_PROMPT_TITLE,
             String.format(OPEN_PROMPT, new Object[] {target.getText()}))) {
@@ -299,7 +299,7 @@ public class ApexDocForm extends ApplicationWindow {
       public void widgetDefaultSelected(SelectionEvent event) {}
       public void widgetSelected(SelectionEvent event) {
         t.setText(isDir ? new DirectoryDialog(form.getShell()).open() :
-          new FileDialog(form.getShell(), SWT.SAVE).open());
+          new FileDialog(form.getShell(), SWT.OPEN).open());
       }
     });
   }
