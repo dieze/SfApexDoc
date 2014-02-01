@@ -64,7 +64,7 @@ public class HtmlConstants {
   "<div class='topSection'>" +
     "<table>" +
       "<tr><td>" +
-          "<img src='apex_doc_logo.png'/>" +
+          "<img id='logo' src='logo.png'/>" +
         "</td>" +
         "<td>";
 }

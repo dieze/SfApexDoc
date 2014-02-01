@@ -201,16 +201,19 @@ public class FileManager {
   //---------------------------------------------------------------------------
   // Helpers
   private void copyFile(String source, String target) throws Exception {
-    InputStream is = getClass().getResourceAsStream(source);
-    FileOutputStream to = new FileOutputStream(target + "/" + source);
-    byte[] buffer = new byte[4096];
-    int bytesRead;
-    while ((bytesRead = is.read(buffer)) >= 0) {
-      to.write(buffer, 0, bytesRead);
+    target += "/" + source;
+    if (!(new File(target).exists())) {
+      InputStream is = getClass().getResourceAsStream(source);
+      FileOutputStream to = new FileOutputStream(target);
+      byte[] buffer = new byte[4096];
+      int bytesRead;
+      while ((bytesRead = is.read(buffer)) >= 0) {
+        to.write(buffer, 0, bytesRead);
+      }
+      to.flush();
+      to.close();
+      is.close();
     }
-    to.flush();
-    to.close();
-    is.close();
   }
   
   private void createDocFiles(Hashtable<String, String> classHashTable) {
@@ -252,12 +255,12 @@ public class FileManager {
     return links + "</td>";
   }
   
-  private void copyResources(String toFileName) throws IOException, Exception {
-    copyFile("apex_doc_logo.png", toFileName);
-    copyFile("SfApexDoc.css", toFileName);
-    copyFile("h2_trigger_a.gif", toFileName);
-    copyFile("jquery-latest.js", toFileName);
-    copyFile("toggle_block_btm.gif", toFileName);
-    copyFile("toggle_block_stretch.gif", toFileName);
+  private void copyResources(String toPath) throws IOException, Exception {
+    copyFile("logo.png", toPath);
+    copyFile("SfApexDoc.css", toPath);
+    copyFile("h2_trigger_a.gif", toPath);
+    copyFile("jquery-latest.js", toPath);
+    copyFile("toggle_block_btm.gif", toPath);
+    copyFile("toggle_block_stretch.gif", toPath);
   }
 }

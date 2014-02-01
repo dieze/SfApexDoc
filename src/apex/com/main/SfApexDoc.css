@@ -4,7 +4,8 @@ body{
   padding: 0px;
 }
 
-/* the top page banner  */
+/*******************************************************************************
+ * the top page banner  */
 .topSection {
   background-color: SteelBlue;
   width: 100%;
@@ -22,8 +23,12 @@ body{
 .topSection img {
   border: 1px solid #000;
 }
+.topSection #logo {
+  max-height: 82px;
+}
 
-/* section-title is the horizontal section headers that declare the classname, methods, etc. */
+/*******************************************************************************
+ * section-title is the horizontal header that declares the classname, methods, etc. */
 .section-title {
   background-color: SteelBlue;
   border: 1px solid #000000;
@@ -41,12 +46,12 @@ body{
   background-color: #B5CDE1;
   font-size: .9em;
 }
-
 tr {
   vertical-align: top;
 }
 
-/* details is used for displaying the apexdoc values like author, date, description, params, return value, etc. */
+/*******************************************************************************
+ * display the tags like author, date, description, params, return value, etc. */
 .details {
   border-color: lightgray;
 }
@@ -70,8 +75,18 @@ tr {
 .details td{
   font-size: .7em;
 }
+td.classCell {
+  padding-bottom: 40px;
+}
+pre, code {
+  font-size: 120%;
+}
+pre {
+  margin-left: 20px;
+}
 
-/* properties is used to display the table of class properties */
+/*******************************************************************************
+ * properties is used to display the table of class properties */
 .properties {
   border-color: lightgray;
 }
@@ -91,7 +106,8 @@ tr {
   font-weight: normal;
 }
 
-/* trigger is the set of styles to provide the expand/collapse bar */
+/*******************************************************************************
+ * trigger is the set of styles to provide the expand/collapse bar */
 h2.trigger {
   margin: 0 0 2 0;
   background-color: #ccc;
@@ -114,7 +130,8 @@ h2.active {
   background-position: left bottom;
 } /*--When toggle is triggered, it will shift the image to the bottom to show its "opened" state--*/
 
-/* toggle_container is the section that gets shown/hidden when the trigger is expanded/collapsed */
+/*******************************************************************************
+ * section that gets shown/hidden when the trigger is expanded/collapsed */
 .toggle_container {
   padding: 10px;
 }
@@ -124,7 +141,8 @@ h2.active {
   padding-bottom: 5px;
 }
 
-/* leftmenus styles for the menu of class names */
+/*******************************************************************************
+ * styles for the menu of class names */
 .leftmenus{
   vertical-align: top;
   width: 20%;
@@ -143,18 +161,8 @@ h2.active {
   background-color: whitesmoke;
 }
 
-pre, code {
-  font-size: 120%;
-}
-
-pre {
-  margin-left: 20px;
-}
-
+/*******************************************************************************
+ * the footer */
 #footer {
   font-size: 10px;
-}
-
-td.classCell {
-  padding-bottom: 40px;
 }
