@@ -13,8 +13,12 @@ public class FileManager {
   //---------------------------------------------------------------------------
   // Constants
   public static final String ROOT_DIRECTORY = "SfApexDocs";
+  
   private static final String BODY_START = "<body>";
   private static final String BODY_END = "</body>";
+  
+  private static final String TOGGLE_ALL = "<span><input type='button' value='+/- all' onclick='ToggleAll(this);' /></span>";
+  private static final String TOGGLE_ONE = "<input type='button' value='+'/>";
   
   
   //---------------------------------------------------------------------------
@@ -41,10 +45,14 @@ public class FileManager {
     SfApexDoc.assertPrecondition(null != homeFile);
     
     String projectDetail = parseProjectDetail(detailFile.trim());
-    if (projectDetail.isEmpty()) projectDetail = HtmlConstants.DEFAULT_PROJECT_DETAIL;
+    if (projectDetail.isEmpty()) {
+      projectDetail = HtmlConstants.DEFAULT_PROJECT_DETAIL;
+    }
     
     String homeContents = parseHtmlFile(homeFile.trim());
-    if (homeContents.isEmpty()) homeContents = HtmlConstants.DEFAULT_HOME_CONTENTS;
+    if (homeContents.isEmpty()) {
+      homeContents = HtmlConstants.DEFAULT_HOME_CONTENTS;
+    }
     
     String links = "<table width='100%'><tr>" + getPageLinks(models);
     homeContents = links + "<td><h2 class='section-title'>Home</h2>" + homeContents + "</td>";
@@ -53,6 +61,8 @@ public class FileManager {
     
     Hashtable<String, String> classHashTable = new Hashtable<String, String>();
     classHashTable.put("index", homeContents);
+    
+    String all = "<table width='100%'><tr>";
     
     for (ClassModel model : models) {
       String contents = links;
@@ -63,12 +73,17 @@ public class FileManager {
         }
         
         final String fileName = model.getName();
-        contents += createClassDoc(model, fileName) + children;
+        final String classDoc = createClassDoc(model, fileName) + children + "</tr></table>";
+        contents += classDoc;
+        all += classDoc.replace(TOGGLE_ALL, "").replace(TOGGLE_ONE, "");
         
         classHashTable.put(fileName.toLowerCase(), HtmlConstants.HEADER_OPEN + projectDetail +
           HtmlConstants.HEADER_CLOSE + contents + HtmlConstants.FOOTER);
       }
     }
+    
+    classHashTable.put("_all", HtmlConstants.HEADER_OPEN.replace(HtmlConstants.HEADER_TOGGLE, "") +
+      projectDetail + HtmlConstants.HEADER_CLOSE + all + HtmlConstants.FOOTER);
     
     createDocFiles(classHashTable);
   }
@@ -77,9 +92,7 @@ public class FileManager {
     model.addLinks();
     String contents = "<td class='classCell'>";
     contents +=
-      "<h2 class='section-title'>" + fileName +
-        "<span><input type='button' value='+/- all' onclick='ToggleAll(this);' /></span>" +
-      "</h2>" +
+      "<h2 class='section-title'>" + fileName + TOGGLE_ALL + "</h2>" +
       "<div class='toggle_container_subtitle'>" + model.getNameLine() + "</div>" +
       "<table class='details' rules='all' border='1' cellpadding='6'>" +
       (model.getDescription().isEmpty() ? "" : "<tr><th>Description</th><td>" + model.getDescription() + "</td></tr>") +
@@ -90,14 +103,14 @@ public class FileManager {
     
     if (!model.properties.isEmpty()) {
       contents += "<p></p>" +
-        "<h2 class='trigger'><input type='button' value='+'/>&nbsp;&nbsp;<a href='#'>Properties</a></h2>" +
+        "<h2 class='trigger'>" + TOGGLE_ONE + "&nbsp;&nbsp;<a href='#'>Properties</a></h2>" +
         "<div class='toggle_container'> " +
           "<table class='properties' border='1' rules='all' cellpadding='6'> ";
       
       for (PropertyModel prop : model.properties) {
         String name = prop.getName();
         prop.addLinks();
-        contents += "<tr><td class='clsPropertyName'>" + name + "</td>" +
+        contents += "<tr><th class='clsPropertyName'>" + name + "</th>" +
           "<td><div class='clsPropertyDeclaration'>" + prop.getNameLine() + "</div>" +
           "<div class='clsPropertyDescription'>" + prop.getDescription() +
             (prop.getAuthor().isEmpty() && prop.getDate().isEmpty()? "" : " (" + prop.getAuthor() + " " + prop.getDate() + ")") +
@@ -113,7 +126,7 @@ public class FileManager {
       for (MethodModel method : model.methods) {
         String name = method.getName();
         method.addLinks();
-        contents += "<h2 class='trigger'><input type='button' value='+'/>&nbsp;&nbsp;<a href='#'>" + name + "</a></h2>" +
+        contents += "<h2 class='trigger'>" + TOGGLE_ONE + "&nbsp;&nbsp;<a href='#'>" + name + "</a></h2>" +
           "<div class='toggle_container'>" +
           "<div class='toggle_container_subtitle'>" + method.getNameLine() + "</div>" +
           "<table class='details' rules='all' border='1' cellpadding='6'>" +
@@ -146,7 +159,7 @@ public class FileManager {
         contents += "</table></div>";
       }
     }
-    return contents + "</div>";
+    return contents + "</td>";
   }
   
   private String parseProjectDetail(String filePath) {

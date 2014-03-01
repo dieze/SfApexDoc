@@ -15,12 +15,13 @@ public class HtmlConstants {
     "(specify an -author parameter to override this)<br/>" +
     "<a href='https://gitlab.com/StevenWCox/sfapexdoc/wikis/Home'>(GitLab project)</a><br/>";
   
+  public static final String HEADER_TOGGLE = "$('.toggle_container').hide();";
   public static final String HEADER_OPEN = 
     "<html><head><script type='text/javascript' src='jquery-latest.js'></script>" +
     "<link rel='stylesheet' type='text/css' href='SfApexDoc.css' /> " + 
     "<script>" + 
       "$(document).ready(function() {" +
-        "$('.toggle_container').hide();\n" + 
+        HEADER_TOGGLE + "\n" + 
         "$('h2.trigger').click(function() {\n" +
           "$(this).toggleClass('active').next().slideToggle('fast');" +
           "ToggleBtnLabel(this.firstChild);" +
