@@ -12,8 +12,8 @@ import java.util.Map;
  *    printf("Hello");
  * }
  * </pre>
- * 
- * 
+ *
+ *
  * @author Steve Cox
  */
 public class Model {
@@ -43,12 +43,13 @@ public class Model {
   };
   
   // Supported tags
-  private static final String DESC = "@description";
-  private static final String AUTH = "@author";
-  private static final String DATE = "@date";
-  private static final String SEE  = "@see";
-  private static final String RET  = "@return";
-  private static final String PARM = "@param";
+  private static final String DESC   = "@description";
+  private static final String AUTH   = "@author";
+  private static final String DATE   = "@date";
+  private static final String SEE    = "@see";
+  private static final String RET    = "@return";
+  private static final String PARM   = "@param";
+  private static final String THROWS = "@throws";
   
   
   //---------------------------------------------------------------------------
@@ -60,6 +61,7 @@ public class Model {
   private String returns = "";
   private String see = "";
   private ArrayList<String> params = new ArrayList<String>();
+  private ArrayList<String> except = new ArrayList<String>();
   
   private boolean linksAdded = false;
   
@@ -83,41 +85,54 @@ public class Model {
     return null;
   }
   
-  public String getNameLine() { 
+  public String getNameLine() {
     return nameLine;
   }
   
   public void setNameLine(String nameLine) {
     SfApexDoc.assertPrecondition(null != nameLine);
-    SfApexDoc.assertPrecondition(nameLine.isEmpty() || 
-      (!Character.isWhitespace(nameLine.charAt(0)) && 
+    SfApexDoc.assertPrecondition(nameLine.isEmpty() ||
+      (!Character.isWhitespace(nameLine.charAt(0)) &&
       !Character.isWhitespace(nameLine.charAt(nameLine.length()-1))));
     
     this.nameLine = nameLine;
   }
   
-  public String getDescription() { 
+  public String getDescription() {
     return description;
   }
   
-  public String getAuthor() { 
+  public String getAuthor() {
     return author;
   }
   
-  public String getDate() { 
+  public String getDate() {
     return date;
   }
   
-  public String getReturns() { 
+  public String getReturns() {
     return returns;
   }
   
-  public String getSee() { 
+  public String getSee() {
     return see;
   }
   
-  public ArrayList<String> getParams() { 
+  public ArrayList<String> getParams() {
     return params;
+  }
+  
+  public ArrayList<String> getThrows() {
+    return except;
+  }
+  
+  public String getThrowsAsString() {
+    String result = "";
+    for (String x : except) {
+      result += "<br/>throws " + x;
+    }
+    
+    return result;
   }
   
   /** HTML encode and add type links to the model */
@@ -126,6 +141,10 @@ public class Model {
     
     setNameLine(addLinks(nameLine));
     see = addLinks(see);
+    for (Integer i = 0; i < except.size(); ++i) {
+      except.set(i, addLinks(except.get(i)));
+    }
+    
     linksAdded = true;
   }
   
@@ -171,7 +190,8 @@ public class Model {
         ((i = lowerComment.indexOf(block = DATE)) >= 0) ||
         ((i = lowerComment.indexOf(block = SEE)) >= 0) ||
         ((i = lowerComment.indexOf(block = RET)) >= 0) ||
-        ((i = lowerComment.indexOf(block = PARM)) >= 0)) {
+        ((i = lowerComment.indexOf(block = PARM)) >= 0) ||
+        ((i = lowerComment.indexOf(block = THROWS)) >= 0)) {
         
         comment = comment.substring(i + block.length());
         curBlock = block;
@@ -200,16 +220,19 @@ public class Model {
         } else if (PARM == curBlock) {
           String p = (newBlock ? "" : params.remove(params.size()-1));
           params.add(p + (!p.isEmpty() ? " " : "") + line.trim());
+        } else if (THROWS == curBlock) {
+          String p = (newBlock ? "" : except.remove(except.size()-1));
+          except.add(p + (!p.isEmpty() ? " " : "") + line.trim());
         } else {
           // not in a recognized tag - assume it's the description
           curBlock = block = DESC;
           
-          // see if we're in a <pre> or <code> tag
+          // are we in a <pre> or <code> tag?
           if (inPre) {
             description += "\n" + line;
           } else {
             inPre = ((line.indexOf("<pre") >= 0) || (line.indexOf("<code") >= 0));
-            description += (!description.isEmpty() ? " " : "") + 
+            description += (!description.isEmpty() ? " " : "") +
               (inPre ? line : line.trim());
           }
           

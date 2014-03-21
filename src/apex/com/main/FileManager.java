@@ -114,7 +114,7 @@ public class FileManager {
           "<td><div class='clsPropertyDeclaration'>" + prop.getNameLine() + "</div>" +
           "<div class='clsPropertyDescription'>" + prop.getDescription() +
             (prop.getAuthor().isEmpty() && prop.getDate().isEmpty()? "" : " (" + prop.getAuthor() + " " + prop.getDate() + ")") +
-            (prop.getSee().isEmpty() ? "" : " see " + prop.getSee()) +
+            (prop.getSee().isEmpty() ? "" : ", see " + prop.getSee()) + prop.getThrowsAsString() +
           "</div></tr>";
       }
       
@@ -156,6 +156,11 @@ public class FileManager {
         }
         
         contents += (method.getSee().isEmpty() ? "" : "<tr><th>See</th><td>" + method.getSee() + "</td></tr>");
+        if (!method.getThrows().isEmpty()) {
+          for (String t : method.getThrows()) {
+            contents += "<tr><th>Throws</th><td>" + t + "</td></tr>";
+          }
+        }
         contents += "</table></div>";
       }
     }

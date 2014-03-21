@@ -20,16 +20,22 @@ import java.util.Map;
 public class SfApexDoc {
   //---------------------------------------------------------------------------
   // Constants
-  public static final String VERSION = "1.2.2";
+  public static final String VERSION = "1.2.4";
   private static final String LOG_FILE_NAME = "SfApexDocLog.txt";
   private static final String DEFAULT_EXT = "cls";
   
   public static final Map<String,Boolean> SCOPES = new HashMap<String,Boolean>();
+  private static final String SCOPE_WEBSERVICE  = "webservice";
+  private static final String SCOPE_GLOBAL      = "global";
+  private static final String SCOPE_PUBLIC      = "public";
+  private static final String SCOPE_PROTECTED   = "protected";
+  private static final String SCOPE_PRIVATE     = "private";
   static {
-    SCOPES.put("global", true);
-    SCOPES.put("public", true);
-    SCOPES.put("protected", false);
-    SCOPES.put("private", false);
+    SCOPES.put(SCOPE_WEBSERVICE, true);
+    SCOPES.put(SCOPE_GLOBAL, true);
+    SCOPES.put(SCOPE_PUBLIC, true);
+    SCOPES.put(SCOPE_PROTECTED, false);
+    SCOPES.put(SCOPE_PRIVATE, false);
   };
   public static final String SCOPE_SEP = ",";
   private static final String END_OF_SIGNATURE = "{}=;";
@@ -192,6 +198,10 @@ public class SfApexDoc {
   // Parse the specified text; see inline comments for specific rules
   // public only for testing
   public static ClassModel parse(String text, ArrayList<String> scope) {
+    if (scope.contains(SCOPE_GLOBAL)) {
+      scope.add(SCOPE_WEBSERVICE);
+    }
+    
     ClassModel parentClass = null, model = null;
     String line = "", prevLine = null;
     int lineIndex = 0, nestedCurlyBraceDepth = 0;

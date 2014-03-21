@@ -141,11 +141,9 @@ public class ApexDocForm extends ApplicationWindow {
     
     // scope buttons
     toolkit.createLabel(form.getBody(), SCOPE_LABEL, SWT.NULL).setBackground(bg);
-    GridData gd = new GridData(GridData.BEGINNING);
-    gd.horizontalSpan = 2;
     final ArrayList<Button> scopeButtons = new ArrayList<Button>();
     for (String s : SfApexDoc.SCOPES.keySet()) {
-      scopeButtons.add(createScopeButton(toolkit, form, s, SfApexDoc.SCOPES.get(s), gd, bg));
+      scopeButtons.add(createScopeButton(toolkit, form, s, SfApexDoc.SCOPES.get(s), bg));
       toolkit.createLabel(form.getBody(), "", SWT.NULL).setBackground(bg);
     }
   
@@ -286,7 +284,10 @@ public class ApexDocForm extends ApplicationWindow {
     return b;
   }
   
-  private static Button createScopeButton(FormToolkit toolkit, Form form, String label, boolean sel, GridData gd, Color bg) {
+  private static Button createScopeButton(FormToolkit toolkit, Form form, String label, boolean sel, Color bg) {
+    GridData gd = new GridData(GridData.BEGINNING);
+    gd.horizontalSpan = 2;
+    
     final Button b = toolkit.createButton(form.getBody(), label, SWT.CHECK);
     b.setSelection(sel);
     b.setLayoutData(gd);

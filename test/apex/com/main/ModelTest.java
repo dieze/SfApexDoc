@@ -135,9 +135,11 @@ public class ModelTest {
     comments.add("*  d  ");
     comments.add("");
     comments.add("\t @see   e  ");
+    comments.add("@throws   myEx  ");
     Model m = new Model("", comments);
     assertEquals("description", "a b c d", m.getDescription());
     assertEquals("see", "e", m.getSee());
+    assertEquals("throws", "myEx", m.getThrows().get(0));
   }
   
   @Test
@@ -186,6 +188,9 @@ public class ModelTest {
     comments.add("@return\tvoid");
     comments.add("@param 1 a");
     comments.add("@param 2 b");
+    comments.add("@throws x.1 first");
+    comments.add("@throws x.2 second");
+    
     Model m = new Model("", comments);
     assertEquals("description", "this is a description", m.getDescription());
     assertEquals("author", "Me", m.getAuthor());
@@ -194,6 +199,8 @@ public class ModelTest {
     assertEquals("return", "void", m.getReturns());
     assertEquals("param 1", "1 a", m.getParams().get(0));
     assertEquals("param 2", "2 b", m.getParams().get(1));
+    assertEquals("throws x.1", "x.1 first", m.getThrows().get(0));
+    assertEquals("throws x.2", "x.2 second", m.getThrows().get(1));
   }
   
   @Test
@@ -241,5 +248,6 @@ public class ModelTest {
     assertEquals("blank returns", "", m.getReturns());
     assertEquals("blank see", "", m.getSee());
     assertEquals("blank params", 0, m.getParams().size());
+    assertEquals("blank throws", 0, m.getThrows().size());
   }
 }

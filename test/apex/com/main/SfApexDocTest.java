@@ -47,6 +47,7 @@ public class SfApexDocTest {
     assertTrue(SfApexDoc.parse("public class A {\n String s(", publicScope).properties.isEmpty());
     assertTrue(SfApexDoc.parse("public class A {\n publicx String s(", publicScope).properties.isEmpty());
     assertTrue(SfApexDoc.parse("public class A {\n xpublic String s(", publicScope).properties.isEmpty());
+    assertTrue(SfApexDoc.parse("public class A {\n webservice String s(", publicScope).properties.isEmpty());
   }
   
   @Test
@@ -117,6 +118,8 @@ public class SfApexDocTest {
     assertEquals("m", SfApexDoc.parse("public class A {\n  @future public string m();", publicScope).methods.get(0).getName());
     assertEquals("m", SfApexDoc.parse("public class A {\n  \n public\tstring \tm ();", publicScope).methods.get(0).getName());
     assertEquals("m", SfApexDoc.parse("public class A {\n  \n public \n string \n m(); ", publicScope).methods.get(0).getName());
+    assertEquals("m", SfApexDoc.parse("global class A {\n  \n webservice \n string \n m(); ", scopes(new String[]{ "global", "webservice" })).methods.get(0).getName());
+    assertEquals("m", SfApexDoc.parse("global class A {\n  \n webservice \n string \n m(); ", scopes(new String[]{ "global" })).methods.get(0).getName());
     
     assertEquals("PUBLIC string m ()", SfApexDoc.parse("public class A {\n PUBLIC string m ();", publicScope).methods.get(0).getNameLine());
   }

@@ -29,11 +29,11 @@ public class ClassModel extends Model {
     super(nameLine.trim(), comments);
     isInterface = getNameLine().matches("(^|.*\\s)interface\\s+.*");
     
-    final String unqualifiedName = getName().toLowerCase();
     this.parent = parent;
+    final String name = getName();
     
     // add this as a 'type' we can link to
-    addType(getName(), unqualifiedName + ".html");
+    addType(name, name.toLowerCase().split("\\.")[0] + ".html");
   }
   
   public ClassModel(String nameLine, ArrayList<String> comments) {
