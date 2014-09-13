@@ -171,3 +171,17 @@ h2.active {
   font-size: 10px;
 }
 }
+
+.history th {
+	text-align: center;
+}
+
+.history td {
+	width: auto;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.history .remarks {
+	width: 90%;
+}

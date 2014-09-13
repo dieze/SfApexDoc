@@ -88,6 +88,48 @@ public class FileManager {
     createDocFiles(classHashTable);
   }
   
+  private String formatHistory(String history) {	  
+	  String[] lines = history.split("\\r?\\n");
+	  String[] fields;
+	  
+	  String result = "<table class=\"history\"><thead>";
+	  
+	  for (Integer i=0; i<lines.length; i++) {
+		  String line = lines[i].trim();
+		  
+		  if (line.matches("(\\-+[\\s\\t]*\\|?[\\s\\t]*)+")) {
+			  continue;
+		  }
+		  
+		  fields = line.split("\\|");
+		  result += "<tr>";
+		  
+		  for (Integer j=0; j<fields.length; j++) {
+			  String field = fields[j].trim();
+			  
+			  if (field.equals("Date") || field.equals("Author") || field.equals("Version")) {
+				  result += ("<th>"+field+"</th>");
+				  continue;
+			  } else if (field.equals("Remarks")) {
+				  result += ("<th class=\"remarks\">"+field+"</th>");
+				  continue;
+			  }
+			  
+			  if (result.endsWith("</th>")) {
+				  result += "</tr></thead><tbody>";
+			  }
+			  
+			  result += "<td>"+field+"</td>";
+		  }
+		  
+		  result += "</tr>";
+	  }
+	  
+	  result += "</tbody></table>";
+	  
+	  return result;
+  }
+  
   private String createClassDoc(ClassModel model, String fileName) {
     model.addLinks();
     String contents = "<td class='classCell'>";
@@ -98,7 +140,9 @@ public class FileManager {
       (model.getDescription().isEmpty() ? "" : "<tr><th>Description</th><td>" + model.getDescription() + "</td></tr>") +
       (model.getAuthor().isEmpty() ? "" : "<tr><th>Author</th><td>" + model.getAuthor() + "</td></tr>") +
       (model.getDate().isEmpty() ? "" : "<tr><th>Date</th><td>" + model.getDate() + "</td></tr>") +
+      (model.getVersion().isEmpty() ? "" : "<tr><th>Version</th><td>" + model.getVersion() + "</td></tr>") +
       (model.getSee().isEmpty() ? "" : "<tr><th>See</th><td>" + model.getSee() + "</td></tr>") +
+      (model.getHistory().isEmpty() ? "" : "<tr><th>History</th><td>" + formatHistory(model.getHistory()) + "</td></tr>") +
       "</table>";
     
     if (!model.properties.isEmpty()) {
@@ -133,6 +177,8 @@ public class FileManager {
           (method.getDescription() != "" ? "<tr><th>Description</th><td>" + method.getDescription() + "</td></tr> " : "") +
           (method.getAuthor() != "" ? "<tr><th>Author</th><td>" + method.getAuthor() + "</td></tr> " : "") +
           (method.getDate() != "" ? "<tr><th>Date</th><td>" + method.getDate() + "</td></tr> " : "") +
+          (method.getVersion() != "" ? "<tr><th>Version</th><td>" + method.getVersion() + "</td></tr> " : "") +
+          (method.getSince() != "" ? "<tr><th>Since</th><td>" + method.getSince() + "</td></tr> " : "") +
           (method.getReturns() != "" ? "<tr><th>Returns</th><td>" + method.getReturns() + "</td></tr> " : "") +
           (method.getParams().size() > 0 ? "<tr><th colspan='2' class='paramHeader'>Parameters</th></tr> " : "");
         

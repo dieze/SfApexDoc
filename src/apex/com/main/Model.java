@@ -50,7 +50,9 @@ public class Model {
   private static final String RET    = "@return";
   private static final String PARM   = "@param";
   private static final String THROWS = "@throws";
-  
+  private static final String SINCE  = "@since";
+  private static final String VERSION = "@version";
+  private static final String HISTORY = "@history";
   
   //---------------------------------------------------------------------------
   // Properties
@@ -60,6 +62,9 @@ public class Model {
   private String date = "";
   private String returns = "";
   private String see = "";
+  private String since = "";
+  private String version = "";
+  private String history = "";
   private ArrayList<String> params = new ArrayList<String>();
   private ArrayList<String> except = new ArrayList<String>();
   
@@ -116,6 +121,18 @@ public class Model {
   
   public String getSee() {
     return see;
+  }
+  
+  public String getSince() {
+	  return since;
+  }
+  
+  public String getVersion() {
+	  return version;
+  }
+  
+  public String getHistory() {
+	  return history;
   }
   
   public ArrayList<String> getParams() {
@@ -189,8 +206,11 @@ public class Model {
         ((i = lowerComment.indexOf(block = AUTH)) >= 0) ||
         ((i = lowerComment.indexOf(block = DATE)) >= 0) ||
         ((i = lowerComment.indexOf(block = SEE)) >= 0) ||
+        ((i = lowerComment.indexOf(block = SINCE)) >= 0) ||
+        ((i = lowerComment.indexOf(block = VERSION)) >= 0) ||
         ((i = lowerComment.indexOf(block = RET)) >= 0) ||
         ((i = lowerComment.indexOf(block = PARM)) >= 0) ||
+        ((i = lowerComment.indexOf(block = HISTORY)) >= 0) ||
         ((i = lowerComment.indexOf(block = THROWS)) >= 0)) {
         
         comment = comment.substring(i + block.length());
@@ -215,6 +235,10 @@ public class Model {
           date += (!date.isEmpty() ? " " : "") + line.trim();
         } else if (SEE == curBlock) {
           see += (!see.isEmpty() ? " " : "") + line.trim();
+        } else if (SINCE == curBlock) {
+          since += (!since.isEmpty() ? " " : "") + line.trim();
+        } else if (VERSION == curBlock) {
+          version += (!version.isEmpty() ? " " : "") + line.trim();
         } else if (RET == curBlock) {
           returns += (!returns.isEmpty() ? " " : "") + line.trim();
         } else if (PARM == curBlock) {
@@ -223,6 +247,8 @@ public class Model {
         } else if (THROWS == curBlock) {
           String p = (newBlock ? "" : except.remove(except.size()-1));
           except.add(p + (!p.isEmpty() ? " " : "") + line.trim());
+        } else if (HISTORY == curBlock) {
+              history += (!history.isEmpty() ? "\n" : "") + line.trim();
         } else {
           // not in a recognized tag - assume it's the description
           curBlock = block = DESC;

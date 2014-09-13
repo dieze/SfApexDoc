@@ -15,3 +15,4 @@ Import-Package: org.eclipse.jdt.core,
 Export-Package: apex.com.main, com.apex.doc, com.apex.doc.popup.actions
 Bundle-Localization: plugin
 Bundle-Vendor: %Bundle-Vendor.0
+Main-Class: apex.com.main.SfApexDoc
